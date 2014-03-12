@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include "videoprocessorclass.h"
+#include "camshiftprocessing.h"
 
 int main(int argc, const char *argv[]) {
 
@@ -27,16 +28,24 @@ int main(int argc, const char *argv[]) {
         return -1;
     }*/
 
-    std::cout<< argv[0] << std::endl;
+    //std::cout<< argv[0] << std::endl;
     VideoProcessorClass* videoProcessor  =   new VideoProcessorClass(atoi(argv[1]));
+    CamshiftProcessing* camshift = new CamshiftProcessing();
+
+
     videoProcessor->SetVideoCaptureInstance();
     //videoProcessor->ChooseProcessorClass(atoi(argv[1]));
-    videoProcessor->SetframeToStopProcessing(100);
+    videoProcessor->SetframeToStopProcessing(10);
     videoProcessor->displayInput("Input Frame");
     videoProcessor->displayOutput("Output Frame");
 
 
     videoProcessor->ProcessVideoFrame();
+    std::cout << videoProcessor->facedetectionClass->regionOfInterestinHSV.size() << std::endl;
+    camshift->GetColorProbabilityMask(videoProcessor);
+
+    delete videoProcessor;
+    delete camshift;
 
     return 0;
 }

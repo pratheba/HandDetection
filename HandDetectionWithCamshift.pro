@@ -7,7 +7,9 @@ SOURCES += main.cpp \
     haarcascaseclassifierclass.cpp \
     videoprocessorclass.cpp \
     facedetectionclass.cpp \
-    motiondetectionclass.cpp
+    motiondetectionclass.cpp \
+    camshiftprocessing.cpp \
+    maskforcamshift.cpp
 
 
 
@@ -42,5 +44,13 @@ HEADERS += \
     haarcascaseclassifierclass.h \
     videoprocessorclass.h \
     facedetectionclass.h \
-    motiondetectionclass.h
+    motiondetectionclass.h \
+    camshiftprocessing.h \
+    maskforcamshift.h
+
+OTHER_FILES += \
+    images/lena.bmp
+
+RESOURCES += \
+    Resources.qrc
 

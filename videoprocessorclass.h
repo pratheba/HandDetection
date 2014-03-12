@@ -8,6 +8,9 @@
 #include "opencv2/objdetect/objdetect.hpp"
 
 #include "facedetectionclass.h"
+//#include "camshiftprocessing.h"
+
+
 
 class VideoProcessorClass
 {
@@ -27,7 +30,12 @@ public:
     cv::Mat GetCurrentFrame() ;
     void Initialize();
 
+    /////////////
+    FaceDetectionClass* facedetectionClass;
+
+
 private:
+    friend class CamshiftProcessing;
     int videoDeviceID;
     cv::Mat currentFrame;
     cv::Mat outputFrame;
@@ -47,7 +55,7 @@ private:
     void DisplayFrames(cv::Mat& currentFrame, cv::Mat& outputFrame);
 
 
-    FaceDetectionClass* facedetectionClass;
+   // FaceDetectionClass* facedetectionClass;
 
 };
 

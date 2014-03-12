@@ -9,30 +9,37 @@
 
 #include <iostream>
 
-
+/*
 struct PositionAndScale {
     cv::Point2d XY;
     cv::Size    sizeOfWindow;
 
     PositionAndScale(cv::Point2d XY_, cv::Size sizeOfWindow_): XY(XY_), sizeOfWindow(sizeOfWindow_){}
+    void SetValue(cv::Point2d XY_, cv::Size sizeOfWindow_) {
+        XY = XY_;
+        sizeOfWindow = sizeOfWindow_;
+    }
 };
+*/
 
 class HaarCascaseClassifierClass
 {
 public:
     HaarCascaseClassifierClass();
     HaarCascaseClassifierClass(std::string cascadeXML_);
-    void ProcessFrame(cv::Mat& inputFrame, cv::Mat& outputFrame);
-    std::vector< PositionAndScale >  GetPositionAndScaleOfDetectedItem();
-    void reset();
+    ~HaarCascaseClassifierClass();
 
-    std::vector< PositionAndScale > posAndScale;
+    void ProcessFrame(cv::Mat& inputFrame, cv::Mat& outputFrame);
+    //PositionAndScale GetPositionAndScaleOfDetectedItem();
+    cv::Rect_<int> GetPositionAndScaleOfDetectedItem();
+    void reset();
 
 private:
     cv::Mat currentFrame;
     cv::Mat processedFrame;
     std::string cascadeXML;
     cv::CascadeClassifier haarCascadeClassifier;
+    cv::Rect_<int> posAndScale;
 
     std::vector< cv::Rect_<int> > itemsDetected;
     std::vector< cv::Rect_<int> >::iterator iter;

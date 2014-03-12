@@ -62,7 +62,7 @@ void VideoProcessorClass::stopProcessing() {
 }
 
 int VideoProcessorClass::getFrameNumber() {
-    return (static_cast<long>(capture.get(CV_CAP_PROP_POS_FRAMES)));
+    return (int)(capture.get(CV_CAP_PROP_POS_FRAMES));
 }
 
 void VideoProcessorClass::DisplayFrames() {
@@ -98,6 +98,7 @@ void VideoProcessorClass::ProcessVideoFrame() {
         std::cout << "Video frame could not be read\n . Try re-initializing\n" << std::endl;
         return;
     }
+    int currentframenumber = 0;
 
 
     while(!isToStopProcessing()) {
@@ -106,12 +107,14 @@ void VideoProcessorClass::ProcessVideoFrame() {
         facedetectionClass->ProcessFrameToDetectface(currentFrame, outputFrame);
         //process(currentFrame, outputFrame);
 
-        //frameToStopProcessing++;
+        currentframenumber++;
         DisplayFrames();
         //DisplayFrames(currentFrame, outputFrame);
-        //if(frameToStopProcessing >= 0 && getFrameNumber() == frameToStopProcessing)
-            //stopProcessing();
-        //outputFrame.release();
+        //if(frameToStopProcessing >= 0 && getFrameNumber() == frameToStopProcessing) {
+        if(currentframenumber == frameToStopProcessing) {
+            facedetectionClass->isFramesReached = true;
+            stopProcessing();
+        }
 
         int c = cvWaitKey(10);
         if(c==27)  //ESC key
