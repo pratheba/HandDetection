@@ -15,6 +15,9 @@
 class VideoProcessorClass
 {
 public:
+    static VideoProcessorClass* getInstance(int videoDeviceID_);
+    static VideoProcessorClass* getInstance();//int* trainingLabel_, int numTrainingExamples_);
+    void        release();
     VideoProcessorClass();
     VideoProcessorClass(int videoDeviceID_);
 
@@ -35,7 +38,10 @@ public:
 
 
 private:
-    friend class CamshiftProcessing;
+    //friend class CamshiftProcessing;
+    static VideoProcessorClass* videoProcessorClass;
+    ~VideoProcessorClass();
+
     int videoDeviceID;
     cv::Mat currentFrame;
     cv::Mat outputFrame;

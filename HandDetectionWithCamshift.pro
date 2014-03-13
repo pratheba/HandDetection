@@ -9,7 +9,9 @@ SOURCES += main.cpp \
     facedetectionclass.cpp \
     motiondetectionclass.cpp \
     camshiftprocessing.cpp \
-    maskforcamshift.cpp
+    maskforcamshift.cpp \
+    lkpyramid.cpp \
+    handdetectionclass.cpp
 
 
 
@@ -46,7 +48,9 @@ HEADERS += \
     facedetectionclass.h \
     motiondetectionclass.h \
     camshiftprocessing.h \
-    maskforcamshift.h
+    maskforcamshift.h \
+    lkpyramid.h \
+    handdetectionclass.h
 
 OTHER_FILES += \
     images/lena.bmp

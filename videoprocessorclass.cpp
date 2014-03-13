@@ -1,11 +1,32 @@
 #include "videoprocessorclass.h"
 
-VideoProcessorClass::VideoProcessorClass(int videoDeviceID_): videoDeviceID(videoDeviceID_), facedetectionClass(new FaceDetectionClass()), numberOfProcessedFrame(0),frameToStopProcessing(0),
+
+VideoProcessorClass* VideoProcessorClass::videoProcessorClass = NULL;
+
+VideoProcessorClass* VideoProcessorClass::getInstance() {
+    return videoProcessorClass;
+}
+
+VideoProcessorClass* VideoProcessorClass::getInstance(int videoDeviceID_) {
+    if(videoProcessorClass == NULL) {
+        videoProcessorClass      =   new VideoProcessorClass(videoDeviceID_);
+    }
+    return videoProcessorClass;
+}
+
+VideoProcessorClass::videoProcessorClass(int videoDeviceID_): videoDeviceID(videoDeviceID_), facedetectionClass(new FaceDetectionClass()), numberOfProcessedFrame(0),frameToStopProcessing(0),
     isStopProcessing(false)
 { }
 
 VideoProcessorClass::VideoProcessorClass(): videoDeviceID(0), facedetectionClass(new FaceDetectionClass()), numberOfProcessedFrame(0),frameToStopProcessing(0)
 { }
+
+void VideoProcessorClass::release() {
+    if(videoProcessorClass != NULL) {
+        delete videoProcessorClass;
+        videoProcessorClass = NULL;
+    }
+}
 
 void VideoProcessorClass::Initialize() {
     //Default to videoDeviceId 0

@@ -63,6 +63,7 @@ void MaskForCamshift::CalculateMinMaxValueForSkinColor() {
     int maxV = std::numeric_limits<int>::min();
 
     for(int i=0; i < hBins; i++) {
+        /*
         if((hueAccumulator[i] < minH) && (hueAccumulator[i] >= 10)) {
             minH = hueAccumulator[i];
             minHue = i;//hueAccumulator[i];
@@ -70,11 +71,16 @@ void MaskForCamshift::CalculateMinMaxValueForSkinColor() {
         if(hueAccumulator[i] > maxH) {
             maxH = hueAccumulator[i];
             maxHue = i;//hueAccumulator[i];
-        }
+        }*/
+
+        if((minHue < 0) && (hueAccumulator[i] >= 20))
+            minHue = i;
+        if((hueAccumulator[i] >= 20))
+            maxHue = i;
     }
 
     for(int i =0; i < sBins; i++) {
-        if((saturationAccumulator[i] < minS) && (saturationAccumulator[i] >= 10)) {
+        /*if((saturationAccumulator[i] < minS) && (saturationAccumulator[i] >= 10)) {
             minS = saturationAccumulator[i];
             minSat = i;//saturationAccumulator[i];
         }
@@ -91,7 +97,19 @@ void MaskForCamshift::CalculateMinMaxValueForSkinColor() {
         if(valueAccumulator[i] > maxV) {
             maxV = valueAccumulator[i];
             maxValue = i;
-        }
+        }*/
+
+        if((minS < 0 ) && (saturationAccumulator[i] >= 20))
+            minS = i;
+        if((saturationAccumulator[i] >= 20))
+            maxS = i;
+
+
+        if((minV < 0) && (valueAccumulator[i] >= 20))
+            minV = i;
+        if((valueAccumulator[i] >= 20))
+            maxV = i;
+
     }
 }
 

@@ -1,18 +1,24 @@
 #ifndef CAMSHIFTPROCESSING_H
 #define CAMSHIFTPROCESSING_H
 
-#include "facedetectionclass.h"
+
 #include "videoprocessorclass.h"
+#include "maskforcamshift.h"
+#include "lkpyramid.h"
 
 class CamshiftProcessing
 {
 public:
     CamshiftProcessing();
-    void GetColorProbabilityMask(VideoProcessorClass* videoProcessor);
+    void GetColorProbabilityMask();
+    void GetOpticalFlow();
     //FaceDetectionClass* faceDetection;
 
 private:
-     //VideoProcessorClass *videoProcessor;
+     VideoProcessorClass* videoProcessorClass;
+     LKPyramid*             lkPyramidClass;
+     MinMaxHSVValue maskValue;
+     cv::Mat CurrentFrame;
 
 
 };
