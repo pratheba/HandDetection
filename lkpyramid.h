@@ -1,9 +1,12 @@
 #ifndef LKPYRAMID_H
 #define LKPYRAMID_H
 
-
 #include <opencv2/video/tracking.hpp>
 #include <opencv2/video/video.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include <iostream>
+#include <cmath>
 
 class LKPyramid
 {
@@ -13,9 +16,11 @@ public:
     void SetCurrentFrameWindow(std::string windowNameCurr_);
     void SetPrevFrameWindow(std::string windowNamePrev_);
     void SetOpticalFlowWindow(std::string windowNameOpticalFlow_);
+    cv::Mat GetTheMotionMask();
 
 
 private:
+    cv::Mat motionMask;
     cv::Mat currentFrame;
     cv::Mat prevFrame;
     cv::Mat OpticalFlowImage;
@@ -31,7 +36,7 @@ private:
     cv::Size windowSizeForTracking;
     cv::TermCriteria termcriteria;
     std::vector<uchar> statusOfFlowForFeature;
-    std::vector<float> error;
+    cv::Mat error;
 
     std::string windowNamePrev;
     std::string windowNameCurr;
@@ -39,10 +44,11 @@ private:
 
     void GetFeaturesfortracking();
     void GetCornerSubpixelfortracking();
-    void Initialize(cv::Mat& currentFrame_);
-    void Initialize();
+    void Initialize(cv::Mat currentFrame_);
+    //void Initialize();
     void DrawTheFlow();
     void DisplayFlow();
+    void SetTheMotionMask();
 
 
 };

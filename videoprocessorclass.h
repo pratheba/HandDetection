@@ -18,8 +18,7 @@ public:
     static VideoProcessorClass* getInstance(int videoDeviceID_);
     static VideoProcessorClass* getInstance();//int* trainingLabel_, int numTrainingExamples_);
     void        release();
-    VideoProcessorClass();
-    VideoProcessorClass(int videoDeviceID_);
+
 
     void setFrameProcessor( void(*frameProcessingCallBack) (cv::Mat&, cv::Mat&));
     void SetVideoCaptureInstance(int videoDeviceId_);
@@ -36,16 +35,20 @@ public:
     /////////////
     FaceDetectionClass* facedetectionClass;
 
+    cv::VideoCapture capture; // try to change it back to private
+
 
 private:
     //friend class CamshiftProcessing;
     static VideoProcessorClass* videoProcessorClass;
+    VideoProcessorClass();
+    VideoProcessorClass(int videoDeviceID_);
     ~VideoProcessorClass();
 
-    int videoDeviceID;
+    static int videoDeviceID;
     cv::Mat currentFrame;
     cv::Mat outputFrame;
-    cv::VideoCapture capture;
+    //cv::VideoCapture capture;
     std::string windowNameInput;
     std::string windowNameOutput;
     long frameToStopProcessing;
@@ -59,6 +62,7 @@ private:
     int getFrameNumber();
     void DisplayFrames();
     void DisplayFrames(cv::Mat& currentFrame, cv::Mat& outputFrame);
+    void StopDisplayingFrames();
 
 
    // FaceDetectionClass* facedetectionClass;

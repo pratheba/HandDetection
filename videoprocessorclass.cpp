@@ -2,28 +2,35 @@
 
 
 VideoProcessorClass* VideoProcessorClass::videoProcessorClass = NULL;
+int VideoProcessorClass::videoDeviceID = -1;
 
 VideoProcessorClass* VideoProcessorClass::getInstance() {
-    return videoProcessorClass;
+    if(videoProcessorClass != NULL)
+        return videoProcessorClass;
+    else
+        return(getInstance(0)); // default video device ID
 }
 
 VideoProcessorClass* VideoProcessorClass::getInstance(int videoDeviceID_) {
     if(videoProcessorClass == NULL) {
-        videoProcessorClass      =   new VideoProcessorClass(videoDeviceID_);
+        videoDeviceID           = videoDeviceID_;
+        videoProcessorClass      =   new VideoProcessorClass();//(videoDeviceID_);
     }
     return videoProcessorClass;
 }
 
-VideoProcessorClass::videoProcessorClass(int videoDeviceID_): videoDeviceID(videoDeviceID_), facedetectionClass(new FaceDetectionClass()), numberOfProcessedFrame(0),frameToStopProcessing(0),
+/*
+VideoProcessorClass::videoProcessorClass(int videoDeviceID_): facedetectionClass(new FaceDetectionClass()), videoDeviceID(videoDeviceID_), numberOfProcessedFrame(0),frameToStopProcessing(0),
     isStopProcessing(false)
-{ }
+{ }*/
 
-VideoProcessorClass::VideoProcessorClass(): videoDeviceID(0), facedetectionClass(new FaceDetectionClass()), numberOfProcessedFrame(0),frameToStopProcessing(0)
-{ }
+VideoProcessorClass::VideoProcessorClass(): facedetectionClass(new FaceDetectionClass()),frameToStopProcessing(0),  numberOfProcessedFrame(0), isStopProcessing(false) {
+    //if(videoDeviceID)
+}
 
 void VideoProcessorClass::release() {
     if(videoProcessorClass != NULL) {
-        delete videoProcessorClass;
+        //delete videoProcessorClass;
         videoProcessorClass = NULL;
     }
 }
@@ -102,6 +109,10 @@ void VideoProcessorClass::DisplayFrames(cv::Mat& currentFrame, cv::Mat& outputFr
 
 }
 
+void VideoProcessorClass::StopDisplayingFrames() {
+    cv::destroyAllWindows();
+}
+
 void VideoProcessorClass::ChooseProcessorClass(int frameProcessor) {
 
     switch (frameProcessor) {
@@ -135,12 +146,14 @@ void VideoProcessorClass::ProcessVideoFrame() {
         if(currentframenumber == frameToStopProcessing) {
             facedetectionClass->isFramesReached = true;
             stopProcessing();
+            StopDisplayingFrames();
         }
 
         int c = cvWaitKey(10);
         if(c==27)  //ESC key
             break;
 
+        currentFrame.release();
         outputFrame.release();
     }
 }

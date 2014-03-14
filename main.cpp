@@ -29,7 +29,7 @@ int main(int argc, const char *argv[]) {
     }*/
 
     //std::cout<< argv[0] << std::endl;
-    VideoProcessorClass* videoProcessor  =  VideoProcessorClass.getInstance(argv[1]);// new VideoProcessorClass(atoi(argv[1]));
+    VideoProcessorClass* videoProcessor  =  VideoProcessorClass::getInstance(atoi(argv[1]));// new VideoProcessorClass(atoi(argv[1]));
     CamshiftProcessing* camshift = new CamshiftProcessing();
 
 
@@ -42,9 +42,10 @@ int main(int argc, const char *argv[]) {
     videoProcessor->ProcessVideoFrame();
 
     /* Get the color Probability mask */
-    camshift->GetColorProbabilityMask(videoProcessor);
+    //camshift->GetColorProbabilityMask();
+    camshift->GetOpticalFlow();
 
-    delete videoProcessor;
+    videoProcessor->release();
     delete camshift;
 
     return 0;

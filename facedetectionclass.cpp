@@ -66,8 +66,8 @@ void FaceDetectionClass::AverageDetectedFace() {
 
 }
 
-void FaceDetectionClass::GetHSVmaskForFace() {
+MinMaxHSVValue FaceDetectionClass::GetHSVmaskForFace() {
     AverageDetectedFace();
-    maskForCamshift->GetMinMaxValueForSkinColor();
+    return(maskForCamshift->GetMinMaxValueForSkinColor());
 }
 

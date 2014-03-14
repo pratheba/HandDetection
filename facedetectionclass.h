@@ -14,7 +14,7 @@ public:
     cv::Point2d GetPositionOfFaceDetected();
     cv::Size    GetsizeOffaceDetected();
     void ProcessFrameToDetectface(cv::Mat& inputFrame, cv::Mat& outputFrame);
-    void GetHSVmaskForFace();
+    MinMaxHSVValue GetHSVmaskForFace();
 
     bool isFramesReached;
 

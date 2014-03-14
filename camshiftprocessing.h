@@ -10,15 +10,27 @@ class CamshiftProcessing
 {
 public:
     CamshiftProcessing();
-    void GetColorProbabilityMask();
-    void GetOpticalFlow();
+
+    void TrackRegionOfInterest();
     //FaceDetectionClass* faceDetection;
 
 private:
      VideoProcessorClass* videoProcessorClass;
      LKPyramid*             lkPyramidClass;
-     MinMaxHSVValue maskValue;
+     MinMaxHSVValue HSVmaskValue;
+     cv::Mat motionMask;
      cv::Mat CurrentFrame;
+     cv::Mat HSVFrame;
+     cv::Mat HueFrame;
+     cv::Mat maskToCurrentFrame;
+
+     double minDisplacement;
+     double maxDisplacement;
+     cv::Point minDisplacementLocation;
+     cv::Point maxDisplacementLocation;
+
+     void GetColorProbabilityMask();
+     cv::Mat GetOpticalFlow();
 
 
 };
