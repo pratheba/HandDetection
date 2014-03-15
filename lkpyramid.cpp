@@ -2,7 +2,9 @@
 
 #define WINDOW_SIZE  10
 #define MAXFEATURECOUNT  400
-#define THRESHOLD 40
+#define THRESHOLD 50
+#define ROWSTEPSIZE 4
+#define COLSTEPSIZE 5
 
 
 LKPyramid::LKPyramid()
@@ -21,6 +23,8 @@ LKPyramid::LKPyramid()
 
     windowSizeForTracking = cv::Size(WINDOW_SIZE,WINDOW_SIZE);
     termcriteria = cv::TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03);
+
+    cv::namedWindow("motion mask");
 
     //videoProcessorClass = VideoProcessorClass.getInstance();
 
@@ -52,11 +56,27 @@ void LKPyramid::Initialize(cv::Mat inputFrame) {
 }
 
 void LKPyramid::GetGridFeatures() {
+    int row = ROWSTEPSIZE -1;
+    int col = COLSTEPSIZE -1;
+
+    /*if(ROWSTEPSIZE%2 == 0)
+        rowInit = (int)(ROWSTEPSIZE)/2;
+    else
+        rowInit = (int) (ROWSTEPSIZE -1) /2;
+    if(COLSTEPSIZE%2 == 0)
+        colInit = (int)(COLSTEPSIZE)/2;
+    else
+        colInit = (int)(COLSTEPSIZE -1) /2;*/
+
     if(GridFeatures.empty()) {
-        for(int row = 5; row < currentFrame.rows -5; row=row+10)
-            for(int col = 5; col < currentFrame.cols -5; col=col+10) {
+        for( row ; row < currentFrame.rows -ROWSTEPSIZE; row=row+(2*ROWSTEPSIZE)) {
+            row++;
+            col = COLSTEPSIZE -1;
+            for(col ; col < currentFrame.cols -ROWSTEPSIZE; col=col+(2*COLSTEPSIZE)) {
+                col++;
                 GridFeatures.push_back(cv::Point2f(col,row));
             }
+        }
     }
 }
 
@@ -117,7 +137,44 @@ void LKPyramid::CalculateOpticalFlow(cv::Mat inputFrame) {
 
 }
 
+
+
+void LKPyramid::FillTheMotionMask() {
+    /*if(GridFeatures.empty()) {
+        for( row ; row < currentFrame.rows -ROWSTEPSIZE; row=row+ROWSTEPSIZE) {
+            row++;
+            col = COLSTEPSIZE -1;
+            for(col ; col < currentFrame.cols -ROWSTEPSIZE; col=col+COLSTEPSIZE) {
+                col++;
+                GridFeatures.push_back(cv::Point2f(col,row));
+            }
+        }
+    }*/
+
+    if(motionMask.empty())
+        return;
+
+    for(int row = 0; row < currentFrame.rows - ROWSTEPSIZE; row=row+(2*ROWSTEPSIZE)) {
+        for(int col = 0; col < currentFrame.cols - COLSTEPSIZE; col=col+(2*COLSTEPSIZE)) {
+            cv::Rect GridROI = cv::Rect(col, row, (2* COLSTEPSIZE), (2*ROWSTEPSIZE));
+            cv::Mat GridImage = motionMask(GridROI);
+            GridImage.setTo(cv::Scalar((double)(motionMask.at<uchar>(row+ROWSTEPSIZE, col+COLSTEPSIZE))));
+
+            //std::cout << GridImage.rows << "::" << GridImage.cols << std::endl;
+            //cv::cvtColor(GridImage, GridImage, CV_BGR2GRAY);//(double)motionMask.at<uchar>(col+COLSTEPSIZE, row+ROWSTEPSIZE), CV_8U);
+            GridImage.copyTo(motionMask(GridROI));
+            col++;
+        }
+        row++;
+    }
+
+    cv::normalize(motionMask, motionMask,0, 255, cv::NORM_MINMAX, CV_8UC1);
+
+    cv::imshow("motion mask", motionMask);
+}
+
 cv::Mat LKPyramid::GetTheMotionMask() {
+    //FillTheMotionMask();
     cv::Mat motionmaskClone = motionMask.clone();
        return motionmaskClone;
 }
@@ -128,7 +185,7 @@ void LKPyramid::SetTheMotionMask() {
 }
 
 void LKPyramid::DrawTheFlow() {
-    //SetTheMotionMask();
+    SetTheMotionMask();
 
     for (int i = 0; i < PrevFramefeatures.size(); i++) {
         if ((statusOfFlowForFeature[i] == 0) || (int)error.data[i] > 550)
@@ -140,14 +197,9 @@ void LKPyramid::DrawTheFlow() {
           currPt = cv::Point2f(cvRound(CurrentFramefeatures[i].x), cvRound(CurrentFramefeatures[i].y));
 
           double flowVector = std::abs(PrevPt.x - currPt.x) + std::abs(PrevPt.y - currPt.y);
-          /*motionMask.at<uchar>(PrevPt.x, PrevPt.y) =  (flowVector >= THRESHOLD ? flowVector : 0);
-          if(flowVector >= THRESHOLD)
-              cv::circle(OpticalFlowImage, PrevPt, 2, CV_RGB(0,255,0), 1, 8, CV_AA);*/
+          motionMask.at<uchar>(PrevPt.y, PrevPt.x) =  (flowVector <= THRESHOLD ? flowVector : 0);
 
-          if(flowVector <= THRESHOLD) {
-              cv::circle(OpticalFlowImage, PrevPt, 2, CV_RGB(0,255,0), 1, 8, CV_AA);
-
-
+          std::cout << (double)motionMask.at<uchar>(PrevPt.y, PrevPt.x) << std::endl;
           double angle;
           angle = atan2( (double) PrevPt.y - currPt.y, (double) PrevPt.x - currPt.x );
           double hypotenuse;
@@ -165,9 +217,8 @@ void LKPyramid::DrawTheFlow() {
            PrevPt.x = (int) (currPt.x + 5 * cos(angle - (3.14) / 4));
            PrevPt.y = (int) (currPt.y + 5 * sin(angle - (3.14) / 4));
            cv::line( OpticalFlowImage, PrevPt, currPt, CV_RGB(255, 0, 0), 1, CV_AA, 0 );
-          }
-
         }
+    FillTheMotionMask();
 }
 
 void LKPyramid::DisplayFlow() {

@@ -51,6 +51,7 @@ private:
     void DisplayFlow();
     void SetTheMotionMask();
     void GetGridFeatures();
+    void FillTheMotionMask();
 
     double threshold;
 

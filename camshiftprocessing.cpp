@@ -179,7 +179,7 @@ void CamshiftProcessing::TrackRegionOfInterest() {
     lkPyramidClass->SetPrevFrameWindow("previous frame optical flow window");
     lkPyramidClass->SetOpticalFlowWindow("optical flow window");
 
-    //GetColorProbabilityMask();
+    /*
     int iter = 0;
 
     while(true) {
@@ -193,8 +193,10 @@ void CamshiftProcessing::TrackRegionOfInterest() {
     if( c == 27 )
         break;
     }
+    */
 
-/*
+
+   GetColorProbabilityMask();
     Rect trackWindow;
     int hsize = 180;
     float hranges[] = {0,180};
@@ -367,7 +369,7 @@ void CamshiftProcessing::TrackRegionOfInterest() {
         default:
             ;
         }
-    }*/
+    }
 
 }
 
