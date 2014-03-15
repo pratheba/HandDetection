@@ -36,11 +36,7 @@ cv::Size    FaceDetectionClass::GetsizeOffaceDetected() {
 
 void FaceDetectionClass::SaveRegionOfInterestAsHSV(cv::Mat& outputFrame, cv::Rect_<int> ROIrectangle) {
     cv::Mat RegionOfInterestinHSV(outputFrame, ROIrectangle);
-    //RegionOfInterestinHSV = cv::Mat(outputFrame, ROIrectangle);// (outputFrame, ROIrectangle);
-    //cv::cvtColor(RegionOfInterestinHSV, RegionOfInterestinHSV, CV_BGR2HSV);
-   // std::cout << ROIrectangle.x << "::" << ROIrectangle.y << "::" << RegionOfInterestinHSV.total() << std::endl;
     regionOfInterestinHSV.push_back(RegionOfInterestinHSV);
-    //std::cout << regionOfInterestinHSV.size() << std::endl;
 }
 
 void FaceDetectionClass::ProcessFrameToDetectface(cv::Mat& inputFrame, cv::Mat& outputFrame) {
@@ -56,14 +52,11 @@ bool FaceDetectionClass::isRequiredNumberOfFramesreached() {
 
 
 void FaceDetectionClass::AverageDetectedFace() {
-
-     std::vector<cv::Mat>::iterator iter =   regionOfInterestinHSV.begin();
-
+    std::vector<cv::Mat>::iterator iter =   regionOfInterestinHSV.begin();
     if(isRequiredNumberOfFramesreached()) {
         for(; iter != regionOfInterestinHSV.end(); iter++)
             maskForCamshift->CalculateHistogramForImages(*iter);
     }
-
 }
 
 MinMaxHSVValue FaceDetectionClass::GetHSVmaskForFace() {

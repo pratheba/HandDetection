@@ -24,8 +24,10 @@ private:
     cv::Mat currentFrame;
     cv::Mat prevFrame;
     cv::Mat OpticalFlowImage;
+    cv::Mat GridMask;
     std::vector<cv::Point2f>    CurrentFramefeatures ;
     std::vector<cv::Point2f>    PrevFramefeatures ;
+    std::vector<cv::Point2f>    GridFeatures;
 
     int     maxFeaturePoints;
     double  featureQualityLevel;
@@ -45,10 +47,12 @@ private:
     void GetFeaturesfortracking();
     void GetCornerSubpixelfortracking();
     void Initialize(cv::Mat currentFrame_);
-    //void Initialize();
     void DrawTheFlow();
     void DisplayFlow();
     void SetTheMotionMask();
+    void GetGridFeatures();
+
+    double threshold;
 
 
 };

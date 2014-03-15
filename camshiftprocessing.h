@@ -31,7 +31,10 @@ private:
 
      void GetColorProbabilityMask();
      cv::Mat GetOpticalFlow();
-
+     void SelectRegionOfInterest();
+     bool IsBothMatrixOfSameSize(cv::Mat& inputMat1, cv::Mat& inputMat2);
+     cv::Point2i GetStepSizeForROIselection(int rowWidth, int colWidth);
+     cv::Rect GetROIForProcessing(int row, int col, int height, int width);
 
 };
 

@@ -42,8 +42,9 @@ int main(int argc, const char *argv[]) {
     videoProcessor->ProcessVideoFrame();
 
     /* Get the color Probability mask */
+    camshift->TrackRegionOfInterest();
     //camshift->GetColorProbabilityMask();
-    camshift->GetOpticalFlow();
+    //camshift->GetOpticalFlow();
 
     videoProcessor->release();
     delete camshift;
