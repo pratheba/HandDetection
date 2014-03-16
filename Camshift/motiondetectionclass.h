@@ -9,7 +9,7 @@ class MotionDetectionClass
 public:
     MotionDetectionClass();
     cv::Mat GetTheMotionMask(const cv::Mat inputFrame);
-
+    cv::Point GetTheCentroid();
 
 private:
 
@@ -19,16 +19,18 @@ private:
     cv::Rect GridROI;
     cv::Mat GridImage;
     cv::Mat currentFrame;
+    cv::Point centroidPoint;
 
     void DisplayFlow();
     void SetTheMotionMask();
     void FillTheMotionMask();
     void SeperateHand();
     void DrawCentroid(cv::Point centroidPoint);
-    cv::Point GetTheCentroid() ;
+
     void SetGridROI(int row, int col);
     void SetGridPixelToValue(double pixelValue);
     void SetImageWindowName();
+    void SetTheCentroidPoint();
 
     LKPyramid* lkpyramidClass;
 

@@ -1,346 +1,164 @@
 #include "camshiftprocessing.h"
 
-using namespace std;
-using namespace cv;
-
-Mat image;
-
-bool backprojMode = false;
-bool selectObject = false;
-bool flowMode = false;
-int trackObject = 0;
-bool showHist = true;
-Point origin;
-Rect selection;
-int vmin = 10, vmax = 256, smin = 30;
 
 
-
-CamshiftProcessing::CamshiftProcessing()
+CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(false), flowMode(false)
 {
     videoProcessorClass = VideoProcessorClass::getInstance();
-   // lkPyramidClass      = LKPyramid::getInstance();
     motionMaskClass = new MotionDetectionClass();
+    ROIClass = new RegionOfInterest();
     motionMask = cv::Mat();
     cv::namedWindow("ROI",0);
+    IsFirstSelection = true;
+    histogramsize = 180;
 }
-
 
 void CamshiftProcessing::GetColorProbabilityMask() {
     if(videoProcessorClass->facedetectionClass != NULL) {
         HSVmaskValue = videoProcessorClass->facedetectionClass->GetHSVmaskForFace();
     }
-    else {
+    else {float* phranges;
+
         std::cout << "No processing has been done to get the HSV value"  << std::endl;
         return;
     }
 }
 
-
-cv::Mat CamshiftProcessing::GetOpticalFlow() {
+void CamshiftProcessing::SetOpticalFlow() {
     if(motionMask.empty())
         motionMask = cv::Mat(CurrentFrame.rows, CurrentFrame.cols, CV_8U, cv::Scalar(1.0));
     motionMask = cv::Scalar(1.0);
-   motionMask = motionMaskClass->GetTheMotionMask(CurrentFrame.clone());
-    //lkPyramidClass->CalculateOpticalFlow(CurrentFrame.clone());
-   // motionMask = lkPyramidClass->GetTheMotionMask();
-    return motionMask;
+    motionMask = motionMaskClass->GetTheMotionMask(CurrentFrame.clone());
 }
 
-
-
-static void onMouse( int event, int x, int y, int, void* )
-{
-    if( selectObject )
-    {
-        selection.x = MIN(x, origin.x);
-        selection.y = MIN(y, origin.y);
-        selection.width = std::abs(x - origin.x);
-        selection.height = std::abs(y - origin.y);
-
-        selection &= Rect(0, 0, image.cols, image.rows);
-    }
-
-    switch( event )
-    {
-    case EVENT_LBUTTONDOWN:
-        origin = Point(x,y);
-        selection = Rect(x,y,0,0);
-        selectObject = true;
-        break;
-    case EVENT_LBUTTONUP:
-        selectObject = false;
-        if( selection.width > 0 && selection.height > 0 )
-            trackObject = -1;
-        break;
-    }
+void CamshiftProcessing::CalculateBackProjection() {
+    const float* phranges = histogramranges;
+    cv::calcBackProject(&HueFrame, 1, 0, histogramImage, backProjectImage, &phranges);
+    backProjectImage &= HSVMask;
 }
 
+void CamshiftProcessing::CalculateHistogramForRegionOfInterest() {
+    if(ROIFortracking.area() == 0)
+        return;
 
-bool CamshiftProcessing::IsBothMatrixOfSameSize(cv::Mat& inputMat1, cv::Mat& inputMat2) {
-    if((inputMat1.rows == inputMat2.rows && inputMat1.cols == inputMat2.cols) &&
-            (!inputMat1.empty() && !inputMat2.empty()))
-        return true;
-    return false;
+    ROIFortracking &= cv::Rect(0,0, CurrentFrame.cols, CurrentFrame.rows);
+    ROI = cv::Mat(HueFrame, ROIFortracking);
+    ROIMask = cv::Mat(HSVMask, ROIFortracking);
+
+    const float* phranges = histogramranges;
+    cv::calcHist(&ROI, 1, 0, ROIMask, histogramImage, 1, &histogramsize, &phranges);
+    cv::normalize(histogramImage, histogramImage, 0, 255, cv::NORM_MINMAX);
+
 }
 
-
-cv::Point2i CamshiftProcessing::GetStepSizeForROIselection(int rowWidth, int colWidth) {
-
-    cv::Point2i stepSize;
-    if(rowWidth != 0 && colWidth !=0) {
-        stepSize.y = CurrentFrame.rows / rowWidth;
-        stepSize.x = CurrentFrame.cols / colWidth;
-    }
-
-    return stepSize;
+void CamshiftProcessing::GetHueFrameFromHSVFrame() {
+    int channel[] = {0, 0};
+    HueFrame.create(HSVFrame.size(), HSVFrame.depth());
+    mixChannels(&HSVFrame, 1, &HueFrame, 1, channel, 1);
 }
-
-
-cv::Rect CamshiftProcessing::GetROIForProcessing(int row, int col, int height, int width) {
-
-    cv::Rect ROIRectangle;
-    ROIRectangle.x = MIN(col, col+width);
-    ROIRectangle.y = MIN(row, row+height);
-    ROIRectangle.width = width;
-    ROIRectangle.height = height;
-
-    return ROIRectangle;
-}
-
 
 void CamshiftProcessing::SelectRegionOfInterest() {
-
-    if(!IsBothMatrixOfSameSize(CurrentFrame, motionMask))
+    if(motionMask.empty())
         return;
-    cv::Point2i stepSize = GetStepSizeForROIselection(50,50);
+     ROIClass->FindRegionOfInterestToTrack(motionMask);
+     ROIClass->DrawBoundingBoxforRegionOfInterest(CurrentFrame);
+     ROIFortracking = ROIClass->GetBoundingBoxOfRegionofInterest();
+}
 
-    cv::Rect ROIRectangle;
-    cv::Mat RegionOfInterest;
-    cv::Scalar averagePixelIntensity(255,255,255);
-    int finalRow = -1;
-    int finalCol = -1;
+void CamshiftProcessing::SetHSVColorProbabilityMask() {
+    cv::inRange(HSVFrame, cv::Scalar(HSVmaskValue.minhue, HSVmaskValue.minSat, HSVmaskValue.minValue),
+            cv::Scalar(HSVmaskValue.maxhue, HSVmaskValue.maxSat, HSVmaskValue.maxvalue), HSVMask);
 
-    for(int row =   0; row < CurrentFrame.rows; row = row + stepSize.y) {
-        for(int col  =    0; col < CurrentFrame.cols; col = col + stepSize.x) {
+}
 
-            if(row+stepSize.y < motionMask.rows && col+stepSize.x < motionMask.cols) {
-                ROIRectangle = GetROIForProcessing(row, col, stepSize.y, stepSize.x);
+void CamshiftProcessing::ConvertBGRImageToHSV() {
+    if(!CurrentFrame.empty())
+        cv::cvtColor(CurrentFrame, HSVFrame, CV_BGR2HSV);
+}
 
-                //std::cout << motionMask.at<cv::Vec3b>(row+stepSize.y, col+stepSize.x) << std::endl;
-                 RegionOfInterest = cv::Mat(motionMask, ROIRectangle);
+void CamshiftProcessing::DrawTrackingObject(cv::RotatedRect trackingBox) {
 
-                //cv::cvtColor(RegionOfInterest, RegionOfInterest, CV_BGR2GRAY);
-                cv::Scalar avg = cv::mean(RegionOfInterest);
+    if( trackingWindow.area() <= 1 )
+    {
+        int cols = finalProbabilityMask.cols, rows = finalProbabilityMask.rows, r = (MIN(cols, rows) + 5)/6;
+        trackingWindow = cv::Rect(trackingWindow.x - r, trackingWindow.y - r,
+                           trackingWindow.x + r, trackingWindow.y + r) &
+                      cv::Rect(0, 0, cols, rows);
+    }
+     cv::ellipse( CurrentFrame, trackingBox, cv::Scalar(0,0,255), 3, CV_AA );
 
-                if(avg.val[0] < averagePixelIntensity[0]) {
-                    averagePixelIntensity = cv::mean(RegionOfInterest);
-                    //selectionRegion = CurrentFrame(cv::Rect(row, col, row+rowStepSize, col+colStepSize));
-                    finalRow = row;
-                    finalCol = col;
-                    //std::cout << row << "::" << col << std::endl;
-                }
-            }
-        }
+}
+
+void CamshiftProcessing::InitializeCamshift() {
+    ConvertBGRImageToHSV();
+    SetHSVColorProbabilityMask();
+    GetHueFrameFromHSVFrame();
+
+    if(ROIFortracking.area()!=0 && IsFirstSelection) {
+        CalculateHistogramForRegionOfInterest();
+        trackingWindow = ROIFortracking;
+        IsFirstSelection = false;
     }
 
-    //std::cout << finalRow << "::" << finalCol << std::endl;
+}
 
-        cv::rectangle(CurrentFrame, cv::Point(finalCol, finalRow), cv::Point(finalCol + 50, finalRow + 50), CV_RGB(255,0,0),2, CV_AA);
-        cv::imshow("ROI", CurrentFrame);
+void CamshiftProcessing::GetFinalProbabilityMask() {
+    if(flowMode) {
+        if(motionMask.rows != 0 && motionMask.cols !=0 )
+            cv::addWeighted(backProjectImage, 0.4, motionMask, 0.9, 0.0, finalProbabilityMask);
+    }
+    else
+        finalProbabilityMask = backProjectImage.clone();
 
+        if( backprojMode )
+            cv::cvtColor( finalProbabilityMask, CurrentFrame, CV_GRAY2BGR );
+}
+
+void CamshiftProcessing::ApplyFinalProbabilityMask() {
+     cv::RotatedRect trackingBox = cv::CamShift(finalProbabilityMask, trackingWindow, cv::TermCriteria( cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 10, 0.1));
+     DrawTrackingObject(trackingBox);
+}
+
+void CamshiftProcessing::StartCamshift() {
+    InitializeCamshift();
+    CalculateBackProjection();
+    GetFinalProbabilityMask();
+    ApplyFinalProbabilityMask();
+}
+
+void CamshiftProcessing::ActionOnKeyPress(int key) {
+    switch(key)
+    {
+    case 'b':
+        backprojMode = !backprojMode;
+        break;
+    case 'f':
+        flowMode = !flowMode;
+        break;
+    default:
+        ;
+    }
 }
 
 void CamshiftProcessing::TrackRegionOfInterest() {
 
-
-    int iter = 0;
-
+    GetColorProbabilityMask();
     while(true) {
-    videoProcessorClass->capture.read(CurrentFrame);
-    GetOpticalFlow();
-    normalize(motionMask, motionMask, 0, 255, NORM_MINMAX);
+        videoProcessorClass->capture.read(CurrentFrame);
+        if(CurrentFrame.empty())
+            continue;
+        SetOpticalFlow();
+        if(motionMask.empty())
+            continue;
+        SelectRegionOfInterest();
+        StartCamshift();
 
-
-    //SelectRegionOfInterest();
-    char c = (char)waitKey(10);
-    if( c == 27 )
-        break;
-    }
-
-
-/*
-   GetColorProbabilityMask();
-    Rect trackWindow;
-    int hsize = 180;
-    float hranges[] = {0,180};
-    const float* phranges = hranges;
-
-
-    if( !videoProcessorClass->capture.isOpened() )
-    {
-        help();
-        cout << "***Could not initialize capturing...***\n";
-        cout << "Current parameter's value: \n";
-        //parser.printMessage();
-        return;
-    }
-
-    namedWindow( "Histogram", 0 );
-    namedWindow( "CamShift Demo", 0 );
-    setMouseCallback( "CamShift Demo", onMouse, 0 );
-
-    Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
-    bool paused = false;
-      cv::Mat feature = cv::Mat();
-
-      cv::Mat element5(5,5, CV_8U, cv::Scalar(1));
-
-
-    for(;;)
-    {
-        if( !paused )
-        {
-            videoProcessorClass->capture.read(frame);
-            if( frame.empty() )
-
-                break;
-        }
-
-        frame.copyTo(image);
-
-        if( !paused )
-        {
-            CurrentFrame = frame.clone();
-
-            cvtColor(image, hsv, COLOR_BGR2HSV);
-
-            if( trackObject )
-            {normalize(motionMask, motionMask, 0, 255, NORM_MINMAX);
-
-
-                inRange(hsv, Scalar(HSVmaskValue.minhue, HSVmaskValue.minSat, HSVmaskValue.minValue),
-                        Scalar(HSVmaskValue.maxhue, HSVmaskValue.maxSat, HSVmaskValue.maxvalue), mask);
-                int ch[] = {0, 0};
-                hue.create(hsv.size(), hsv.depth());
-                mixChannels(&hsv, 1, &hue, 1, ch, 1);
-
-                if( trackObject < 0 )
-                {
-                    Mat roi(hue, selection), maskroi(mask, selection);
-                    calcHist(&roi, 1, 0, maskroi, hist, 1, &hsize, &phranges);
-                    normalize(hist, hist, 0, 255, NORM_MINMAX);
-
-                    trackWindow = selection;
-                    trackObject = 1;
-
-                    histimg = Scalar::all(0);
-                    int binW = histimg.cols / hsize;
-                    Mat buf(1, hsize, CV_8UC3);
-                    for( int i = 0; i < hsize; i++ )
-                        buf.at<Vec3b>(i) = Vec3b(saturate_cast<uchar>(i*180./hsize), 255, 255);
-                    cvtColor(buf, buf, COLOR_HSV2BGR);
-
-                    for( int i = 0; i < hsize; i++ )
-                    {
-                        int val = saturate_cast<int>(hist.at<float>(i)*histimg.rows/255);
-                        rectangle( histimg, Point(i*binW,histimg.rows),
-                                   Point((i+1)*binW,histimg.rows - val),
-                                   Scalar(buf.at<Vec3b>(i)), -1, 8 );
-                    }
-                }
-
-                calcBackProject(&hue, 1, 0, hist, backproj, &phranges);
-
-                //cout << "motionMask" << std::endl << motionMask << std::endl << std::endl;
-                backproj &= mask;
-
-
-                if(feature.empty())
-                    feature = cv::Mat(CurrentFrame.rows, CurrentFrame.cols, CV_8U);//0.7* backproj + 0.3 * motionMask;
-
-                if(flowMode) {
-                    GetOpticalFlow();
-                    if(motionMask.rows != 0 && motionMask.cols !=0 ) {
-                    std::cout << "with motion flow" << std::endl;
-                    //normalize(motionMask, motionMask, 0, 255, NORM_MINMAX);
-                    //cout << "motionMask" << std::endl << backproj << std::endl << std::endl;
-                    cv::addWeighted(backproj, 0.4, motionMask, 0.9, 0.0, feature);
-                    //feature = motionMask.clone();
-                    //cv::addWeighted(backproj, 1.0, motionMask, 0.8, 0.0, feature);
-                    }
-                    else {
-                        std::cout << "no motion mask available" <<std::endl;
-                    }
-                    }
-                else {
-                    std::cout << "with color distribution" << std::endl;
-                    feature = backproj.clone();
-                }
-
-                //cv::morphologyEx(feature, feature, cv::MORPH_CLOSE, element5);
-
-                RotatedRect trackBox = CamShift(feature, trackWindow,
-                                    TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
-                if( trackWindow.area() <= 1 )
-                {
-                    int cols = backproj.cols, rows = backproj.rows, r = (MIN(cols, rows) + 5)/6;
-                    trackWindow = Rect(trackWindow.x - r, trackWindow.y - r,
-                                       trackWindow.x + r, trackWindow.y + r) &
-                                  Rect(0, 0, cols, rows);
-                }
-
-               // if( backprojMode )
-                   // cvtColor( backproj, image, COLOR_GRAY2BGR );
-                if( backprojMode )
-                    cvtColor( feature, image, COLOR_GRAY2BGR );
-                ellipse( image, trackBox, Scalar(0,0,255), 3, CV_AA );
-            }
-        }
-        else if( trackObject < 0 )
-            paused = false;
-
-        if( selectObject && selection.width > 0 && selection.height > 0 )
-        {
-            Mat roi(image, selection);
-            bitwise_not(roi, roi);
-        }
-
-        imshow( "CamShift Demo", image );
-        imshow( "Histogram", histimg );
-
-
-        char c = (char)waitKey(10);
+        char c = (char)cv::waitKey(10);
         if( c == 27 )
             break;
-        switch(c)
-        {
-        case 'b':
-            backprojMode = !backprojMode;
-            break;
-        case 'c':
-            trackObject = 0;
-            histimg = Scalar::all(0);
-            break;
-        case 'h':
-            showHist = !showHist;
-            if( !showHist )
-                destroyWindow( "Histogram" );
-            else
-                namedWindow( "Histogram", 1 );
-            break;
-        case 'p':
-            paused = !paused;
-            break;
-        case 'f':
-            flowMode = !flowMode;
-            break;
-        default:
-            ;
-        }
-    }
-    */
+        ActionOnKeyPress(c);
 
+    }
 }
 
 

@@ -19,7 +19,7 @@ public:
     void SetStepSize(int rowStepSize, int colStepSize);
     void SetThreshold(int threshold);
     cv::Mat GetTheMotionMask();
-    void DisplayFlow();
+    void DrawAndDisplay();
 
 
 private:
@@ -32,7 +32,6 @@ private:
     cv::Mat prevFrame;
     cv::Mat OpticalFlowImage;
     cv::Mat GridMask;
-    cv::Mat handRegion;
     std::vector<cv::Point2f>    CurrentFramefeatures ;
     std::vector<cv::Point2f>    PrevFramefeatures ;
     std::vector<cv::Point2f>    GridFeatures;
@@ -52,22 +51,19 @@ private:
     std::string windowNameCurr;
     std::string windowNameOpticalFlow;
 
-    void GetFeaturesfortracking();
-    void GetCornerSubpixelfortracking();
-    void Initialize(cv::Mat currentFrame_);
+    bool IsDisplayFlow;
     void DrawTheFlow();
+    void DisplayFlow();
+    void StopDisplay();
 
     void SetTheMotionMask();
     void GetGridFeatures();
-    void FillTheMotionMask();
-    void SeperateHand();
     void SetTheFlowVector();
     double GetAngleOfFlow(cv::Point2f PrevPt, cv::Point2f currPt);
     double getLengthOfFlow(cv::Point2f PrevPt, cv::Point2f currPt);
     void DrawTheArrow(cv::Point2f PrevPt, cv::Point2f currPt, double angle);
     void ConvertFramesToSameType() ;
 
-    void DrawAndDisplay();
 
     double threshold;
 

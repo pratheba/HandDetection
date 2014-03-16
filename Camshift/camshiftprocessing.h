@@ -5,6 +5,8 @@
 #include "videoprocessorclass.h"
 #include "maskforcamshift.h"
 #include "motiondetectionclass.h"
+#include "regionofinterest.h"
+#include "FingerTipDetection/imagesegmentation.h"
 
 class CamshiftProcessing
 {
@@ -12,30 +14,54 @@ public:
     CamshiftProcessing();
 
     void TrackRegionOfInterest();
-    //FaceDetectionClass* faceDetection;
 
 private:
      VideoProcessorClass* videoProcessorClass;
-     //LKPyramid*             lkPyramidClass;
      MotionDetectionClass* motionMaskClass;
+     RegionOfInterest* ROIClass;
      MinMaxHSVValue HSVmaskValue;
+
      cv::Mat motionMask;
      cv::Mat CurrentFrame;
      cv::Mat HSVFrame;
      cv::Mat HueFrame;
      cv::Mat maskToCurrentFrame;
+     cv::Rect ROIFortracking;
+     cv::Mat ROI;
+     cv::Mat ROIMask;
+     cv::Mat HSVMask;
+
+     cv::Mat histogramImage;
+     int histogramsize;
+     float histogramranges[2];
+     cv::Rect trackingWindow;
+     cv::Mat backProjectImage;
+     cv::Mat finalProbabilityMask;
+     bool   IsFirstSelection;
 
      double minDisplacement;
      double maxDisplacement;
      cv::Point minDisplacementLocation;
      cv::Point maxDisplacementLocation;
 
+     bool flowMode;
+     bool backprojMode;
+
      void GetColorProbabilityMask();
-     cv::Mat GetOpticalFlow();
+     void SetOpticalFlow();
      void SelectRegionOfInterest();
-     bool IsBothMatrixOfSameSize(cv::Mat& inputMat1, cv::Mat& inputMat2);
-     cv::Point2i GetStepSizeForROIselection(int rowWidth, int colWidth);
-     cv::Rect GetROIForProcessing(int row, int col, int height, int width);
+     void InitializeCamshift();
+     void GetFinalProbabilityMask();
+     void StartCamshift();
+     void ActionOnKeyPress(int key);
+     void DrawTrackingObject(cv::RotatedRect trackingBox);
+     void ConvertBGRImageToHSV();
+     void SetHSVColorProbabilityMask() ;
+     void GetHueFrameFromHSVFrame();
+     void CalculateHistogramForRegionOfInterest();
+     void CalculateBackProjection();
+     void ApplyFinalProbabilityMask();
+
 
 };
 

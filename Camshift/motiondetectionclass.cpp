@@ -12,7 +12,7 @@ MotionDetectionClass::MotionDetectionClass()
 }
 
 void MotionDetectionClass::DisplayFlow() {
-    lkpyramidClass->DisplayFlow();
+    lkpyramidClass->DrawAndDisplay();
 }
 
 void MotionDetectionClass::SetGridROI(int row, int col) {
@@ -41,20 +41,23 @@ void MotionDetectionClass::FillTheMotionMask() {
 }
 
 cv::Point MotionDetectionClass::GetTheCentroid() {
+    return centroidPoint;
+}
+
+void MotionDetectionClass::SetTheCentroidPoint() {
     cv::Moments handmoment = cv::moments(handRegion, true);
-    cv::Point centroidpoint(handmoment.m10/handmoment.m00, handmoment.m01/handmoment.m00);
-    return centroidpoint;
+    centroidPoint = cv::Point(handmoment.m10/handmoment.m00, handmoment.m01/handmoment.m00);
 }
 
 void MotionDetectionClass::DrawCentroid(cv::Point centroidPoint) {
     cv::circle(currentFrame, centroidPoint, 10, cv::Scalar(255,0,0), 2, 8,0);
-    cv::imshow("motion mask", motionMask);
+    cv::imshow("centroid", currentFrame);
 }
 
 void MotionDetectionClass::SeperateHand() {
     cv::normalize(motionMask, motionMask,0, 255, cv::NORM_MINMAX, CV_8UC1);
     cv::threshold(motionMask, handRegion, 200,255, CV_8UC1);
-    cv::Point centroidPoint = GetTheCentroid();
+    SetTheCentroidPoint();
     DrawCentroid(centroidPoint);
 }
 
@@ -65,6 +68,8 @@ void MotionDetectionClass::SetImageWindowName() {
 }
 
 cv::Mat MotionDetectionClass::GetTheMotionMask(const cv::Mat inputFrame) {
+    if(inputFrame.empty())
+        return cv::Mat();
     currentFrame = inputFrame.clone();
     SetImageWindowName();
     lkpyramidClass->CalculateOpticalFlow(currentFrame);

@@ -34,6 +34,7 @@ LKPyramid::LKPyramid()
     windowSizeForTracking = cv::Size(WINDOW_SIZE,WINDOW_SIZE);
     termcriteria = cv::TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03);
 
+    IsDisplayFlow = false;
     cv::namedWindow("motion mask");
 }
 
@@ -105,7 +106,6 @@ void LKPyramid::CalculateOpticalFlow(const cv::Mat& inputFrame) {
                                  PrevFramefeatures, CurrentFramefeatures,
                                  statusOfFlowForFeature, error,
                                  windowSizeForTracking, 3, termcriteria);
-        DrawAndDisplay();
         SetTheFlowVector();
     }
     else if(prevFrame.empty()) {
@@ -123,9 +123,13 @@ void LKPyramid::CalculateOpticalFlow(const cv::Mat& inputFrame) {
     currentFrame.release();
 }
 
+void LKPyramid::StopDisplay() {
+    IsDisplayFlow = !IsDisplayFlow;
+}
+
 void LKPyramid::DrawAndDisplay() {
-    DrawTheFlow();
-    DisplayFlow();
+        DrawTheFlow();
+        DisplayFlow();
 }
 
 cv::Mat LKPyramid::GetTheMotionMask() {

@@ -9,18 +9,6 @@
 
 #include <iostream>
 
-/*
-struct PositionAndScale {
-    cv::Point2d XY;
-    cv::Size    sizeOfWindow;
-
-    PositionAndScale(cv::Point2d XY_, cv::Size sizeOfWindow_): XY(XY_), sizeOfWindow(sizeOfWindow_){}
-    void SetValue(cv::Point2d XY_, cv::Size sizeOfWindow_) {
-        XY = XY_;
-        sizeOfWindow = sizeOfWindow_;
-    }
-};
-*/
 
 class HaarCascaseClassifierClass
 {
@@ -30,7 +18,6 @@ public:
     ~HaarCascaseClassifierClass();
 
     void ProcessFrame(cv::Mat& inputFrame, cv::Mat& outputFrame);
-    //PositionAndScale GetPositionAndScaleOfDetectedItem();
     cv::Rect_<int> GetPositionAndScaleOfDetectedItem();
     void reset();
 
