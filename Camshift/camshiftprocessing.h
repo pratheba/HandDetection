@@ -4,7 +4,7 @@
 
 #include "videoprocessorclass.h"
 #include "maskforcamshift.h"
-#include "lkpyramid.h"
+#include "motiondetectionclass.h"
 
 class CamshiftProcessing
 {
@@ -16,7 +16,8 @@ public:
 
 private:
      VideoProcessorClass* videoProcessorClass;
-     LKPyramid*             lkPyramidClass;
+     //LKPyramid*             lkPyramidClass;
+     MotionDetectionClass* motionMaskClass;
      MinMaxHSVValue HSVmaskValue;
      cv::Mat motionMask;
      cv::Mat CurrentFrame;

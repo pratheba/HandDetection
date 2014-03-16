@@ -19,7 +19,8 @@ int vmin = 10, vmax = 256, smin = 30;
 CamshiftProcessing::CamshiftProcessing()
 {
     videoProcessorClass = VideoProcessorClass::getInstance();
-    lkPyramidClass      = new LKPyramid();
+   // lkPyramidClass      = LKPyramid::getInstance();
+    motionMaskClass = new MotionDetectionClass();
     motionMask = cv::Mat();
     cv::namedWindow("ROI",0);
 }
@@ -40,8 +41,9 @@ cv::Mat CamshiftProcessing::GetOpticalFlow() {
     if(motionMask.empty())
         motionMask = cv::Mat(CurrentFrame.rows, CurrentFrame.cols, CV_8U, cv::Scalar(1.0));
     motionMask = cv::Scalar(1.0);
-    lkPyramidClass->CalculateOpticalFlow(CurrentFrame.clone());
-    motionMask = lkPyramidClass->GetTheMotionMask();
+   motionMask = motionMaskClass->GetTheMotionMask(CurrentFrame.clone());
+    //lkPyramidClass->CalculateOpticalFlow(CurrentFrame.clone());
+   // motionMask = lkPyramidClass->GetTheMotionMask();
     return motionMask;
 }
 
@@ -74,24 +76,6 @@ static void onMouse( int event, int x, int y, int, void* )
     }
 }
 
-static void help()
-{
-    cout << "\nThis is a demo that shows mean-shift based tracking\n"
-            "You select a color objects such as your face and it tracks it.\n"
-            "This reads from video camera (0 by default, or the camera number the user enters\n"
-            "Usage: \n"
-            "   ./camshiftdemo [camera number]\n";
-
-    cout << "\n\nHot keys: \n"
-            "\tESC - quit the program\n"
-            "\tc - stop the tracking\n"
-            "\tb - switch to/from backprojection view\n"
-            "\th - show/hide object histogram\n"
-            "\tp - pause video\n"
-            "To initialize tracking, select the object with mouse\n";
-}
-
-
 
 bool CamshiftProcessing::IsBothMatrixOfSameSize(cv::Mat& inputMat1, cv::Mat& inputMat2) {
     if((inputMat1.rows == inputMat2.rows && inputMat1.cols == inputMat2.cols) &&
@@ -121,18 +105,11 @@ cv::Rect CamshiftProcessing::GetROIForProcessing(int row, int col, int height, i
     ROIRectangle.width = width;
     ROIRectangle.height = height;
 
-   // std::cout << ROIRectangle.x << "::" << ROIRectangle.y << "::" << ROIRectangle.width << "::" << ROIRectangle.height << std::endl;
-
-    //ROIRectangle &= cv::Rect(0,0,motionMask.cols, motionMask.rows);
-
     return ROIRectangle;
 }
 
 
 void CamshiftProcessing::SelectRegionOfInterest() {
-
-    //cv::destroyAllWindows();
-
 
     if(!IsBothMatrixOfSameSize(CurrentFrame, motionMask))
         return;
@@ -175,11 +152,8 @@ void CamshiftProcessing::SelectRegionOfInterest() {
 }
 
 void CamshiftProcessing::TrackRegionOfInterest() {
-    lkPyramidClass->SetCurrentFrameWindow("current frame optical window");
-    lkPyramidClass->SetPrevFrameWindow("previous frame optical flow window");
-    lkPyramidClass->SetOpticalFlowWindow("optical flow window");
 
-    /*
+
     int iter = 0;
 
     while(true) {
@@ -193,9 +167,9 @@ void CamshiftProcessing::TrackRegionOfInterest() {
     if( c == 27 )
         break;
     }
-    */
 
 
+/*
    GetColorProbabilityMask();
     Rect trackWindow;
     int hsize = 180;
@@ -215,9 +189,6 @@ void CamshiftProcessing::TrackRegionOfInterest() {
     namedWindow( "Histogram", 0 );
     namedWindow( "CamShift Demo", 0 );
     setMouseCallback( "CamShift Demo", onMouse, 0 );
-    createTrackbar( "Vmin", "CamShift Demo", &vmin, 256, 0 );
-    createTrackbar( "Vmax", "CamShift Demo", &vmax, 256, 0 );
-    createTrackbar( "Smin", "CamShift Demo", &smin, 256, 0 );
 
     Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
     bool paused = false;
@@ -232,6 +203,7 @@ void CamshiftProcessing::TrackRegionOfInterest() {
         {
             videoProcessorClass->capture.read(frame);
             if( frame.empty() )
+
                 break;
         }
 
@@ -245,10 +217,7 @@ void CamshiftProcessing::TrackRegionOfInterest() {
 
             if( trackObject )
             {normalize(motionMask, motionMask, 0, 255, NORM_MINMAX);
-                int _vmin = vmin, _vmax = vmax;
 
-                //inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
-                  //      Scalar(180, 256, MAX(_vmin, _vmax)), mask);
 
                 inRange(hsv, Scalar(HSVmaskValue.minhue, HSVmaskValue.minSat, HSVmaskValue.minValue),
                         Scalar(HSVmaskValue.maxhue, HSVmaskValue.maxSat, HSVmaskValue.maxvalue), mask);
@@ -309,7 +278,7 @@ void CamshiftProcessing::TrackRegionOfInterest() {
                     feature = backproj.clone();
                 }
 
-                cv::morphologyEx(feature, feature, cv::MORPH_CLOSE, element5);
+                //cv::morphologyEx(feature, feature, cv::MORPH_CLOSE, element5);
 
                 RotatedRect trackBox = CamShift(feature, trackWindow,
                                     TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
@@ -370,6 +339,7 @@ void CamshiftProcessing::TrackRegionOfInterest() {
             ;
         }
     }
+    */
 
 }
 

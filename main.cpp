@@ -18,8 +18,11 @@
 
 
 #include <iostream>
-#include "videoprocessorclass.h"
-#include "camshiftprocessing.h"
+#include "Camshift/videoprocessorclass.h"
+#include "Camshift/camshiftprocessing.h"
+#include "FingerTipDetection/contourclass.h"
+#include "FingerTipDetection/imagesegmentation.h"
+
 
 int main(int argc, const char *argv[]) {
 
@@ -36,15 +39,24 @@ int main(int argc, const char *argv[]) {
     /* Get the VideoProcessing */
     videoProcessor->SetVideoCaptureInstance();
     //videoProcessor->ChooseProcessorClass(atoi(argv[1]));
-    videoProcessor->SetframeToStopProcessing(10);
-    videoProcessor->displayInput("Input Frame");
-    videoProcessor->displayOutput("Output Frame");
-    videoProcessor->ProcessVideoFrame();
+    //videoProcessor->SetframeToStopProcessing(10);
+    //videoProcessor->displayInput("Input Frame");
+    //videoProcessor->displayOutput("Output Frame");
+
+    //videoProcessor->ProcessVideoFrame();
 
     /* Get the color Probability mask */
     camshift->TrackRegionOfInterest();
     //camshift->GetColorProbabilityMask();
     //camshift->GetOpticalFlow();
+
+
+    //ContourClass* contourClass = new ContourClass();
+    //contourClass->FindContourImage(cv::Mat());
+
+    //ImageSegmentation* imgSegment = new ImageSegmentation();
+    //imgSegment->SegmentByWaterShed(cv::Mat());
+
 
     videoProcessor->release();
     delete camshift;
