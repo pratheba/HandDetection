@@ -1,8 +1,8 @@
 #include "camshiftprocessing.h"
 
+#define CENTROIDTHRESHOLD 200
 
-
-CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(false), flowMode(false)
+CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(false), flowMode(false), drawingMode(false)
 {
     videoProcessorClass = VideoProcessorClass::getInstance();
     motionMaskClass = new MotionDetectionClass();
@@ -12,6 +12,10 @@ CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(
     cv::namedWindow("ROI",0);
     IsFirstSelection = true;
     histogramsize = 180;
+    averageCamshiftDistance = 0;
+    IsAverageDistance = false;
+
+    DrawingBoard = cv::Mat();
 }
 
 void CamshiftProcessing::GetColorProbabilityMask() {
@@ -61,32 +65,42 @@ void CamshiftProcessing::GetHueFrameFromHSVFrame() {
     mixChannels(&HSVFrame, 1, &HueFrame, 1, channel, 1);
 }
 
+
+void CamshiftProcessing::GetRegionOfInterest() {
+    static int iter =0;
+
+    if(ROIFortracking.area() == 0) {
+        avgCenterPoint.x += CentroidPoint.x;
+        avgCenterPoint.y += CentroidPoint.y;
+        iter++;
+        if(iter == 5) {
+            avgCenterPoint.x /= 6;
+            avgCenterPoint.y /= 6;
+            ROIFortracking = cv::Rect(avgCenterPoint.x - 20, avgCenterPoint.y -20, 40, 40);
+              // ROIFortracking = BoundingBoxForROIForTracking;
+            ROIFortracking &= cv::Rect(0,0, CurrentFrame.cols, CurrentFrame.rows);
+        }
+    }
+}
+
 void CamshiftProcessing::SelectRegionOfInterest() {
     if(motionMask.empty())
         return;
 
-    static int iter =0;
+
      ROIClass->Centroid(CentroidPoint);
      ROIClass->FindRegionOfInterestToTrack(motionMask);
      ROIClass->DrawBoundingBoxforRegionOfInterest(CurrentFrame);
      BoundingBoxForROIForTracking = ROIClass->GetBoundingBoxOfRegionofInterest();
+     GetRegionOfInterest();
 
 
-     if(ROIFortracking.area() == 0) {
-         avgCenterPoint.x += CentroidPoint.x;
-         avgCenterPoint.y += CentroidPoint.y;
-         iter++;
-         if(iter == 5) {
-             avgCenterPoint.x /= 6;
-             avgCenterPoint.y /= 6;
-             ROIFortracking = cv::Rect(avgCenterPoint.x - 20, avgCenterPoint.y -20, 40, 40);
-               // ROIFortracking = BoundingBoxForROIForTracking;
-             ROIFortracking &= cv::Rect(0,0, CurrentFrame.cols, CurrentFrame.rows);
-         }
-     }
 }
 
 void CamshiftProcessing::SetHSVColorProbabilityMask() {
+    // Include this if the object to be tracked is of Face
+    // The HSVmaskValue is obtained from training face Detection Classifier
+
     //cv::inRange(HSVFrame, cv::Scalar(HSVmaskValue.minhue, HSVmaskValue.minSat, HSVmaskValue.minValue),
       //      cv::Scalar(HSVmaskValue.maxhue, HSVmaskValue.maxSat, HSVmaskValue.maxvalue), HSVMask);
 
@@ -100,6 +114,96 @@ void CamshiftProcessing::ConvertBGRImageToHSV() {
         cv::cvtColor(CurrentFrame, HSVFrame, CV_BGR2HSV);
 }
 
+
+double Square(double value) {
+    return( value * value);
+}
+
+
+void CamshiftProcessing::newLocationOfCenter(cv::RotatedRect& trackingBox) {
+    double hypotenuse =  std::sqrt(Square(prevtrackingBox.center.x) + Square(prevtrackingBox.center.y));
+    double newangle = prevtrackingBox.angle + 10;
+    trackingBox.angle = newangle;
+    trackingBox.center.y =  std::sin(newangle) * hypotenuse;
+    trackingBox.center.x = std::cos(newangle) * hypotenuse;
+}
+
+
+bool CamshiftProcessing::IsAverageDistanceCalculated(cv::RotatedRect trackingBox) {
+    if(IsAverageDistance)
+        return true;
+    if(GetAverageValueForDistance(trackingBox))
+        return true;
+    return false;
+}
+
+double CamshiftProcessing::GetAverageValueForDistance(cv::RotatedRect trackingBox) {
+    static int iter = 0;
+    if(iter == 20) {
+        averageCamshiftDistance /= 20;
+        IsAverageDistance = true;
+        std::cout << "average distance" << averageCamshiftDistance << std::endl;
+        return averageCamshiftDistance;
+    }
+    if(iter == 0) {
+         iter++;
+        return 0;
+    }
+    double distance = std::sqrt(Square(prevtrackingBox.center.x - trackingBox.center.x) + Square(prevtrackingBox.center.y - trackingBox.center.y));
+    std::cout << ".." << distance << std::endl;
+     averageCamshiftDistance += distance;
+    iter++;
+     return 0;
+}
+
+void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBox) {
+
+
+    if(prevtrackingBox.boundingRect().area() == 0)
+        prevtrackingBox = trackingBox;
+    else {
+        if(IsAverageDistance) {
+            if(std::sqrt(Square(prevtrackingBox.center.x - trackingBox.center.x) + Square(prevtrackingBox.center.y - trackingBox.center.y)) > (averageCamshiftDistance+30)) {
+                trackingBox.angle = prevtrackingBox.angle;// + 1;
+                trackingBox.center.x = prevtrackingBox.center.x;
+                trackingBox.center.y = prevtrackingBox.center.y;
+                //newLocationOfCenter(trackingBox);
+                //std::cout << trackingBox.center.x << "::" << trackingBox.center.y << std::endl;
+                // calculate new position;
+            }
+        } else {
+            IsAverageDistanceCalculated(trackingBox);
+        }
+    }
+
+
+
+    CvBox2D box ;
+    box.angle = trackingBox.angle;
+    box.center = trackingBox.center;
+    box.size = cv::Size(100,150);
+
+    cv::RotatedRect rotatedBox = cv::RotatedRect(box);
+
+    cv::ellipse( CurrentFrame, rotatedBox, cv::Scalar(0,0,255), 3, CV_AA );
+
+    if(IsAverageDistance) {
+    if(drawingMode) {
+        cv::line(DrawingBoard, prevtrackingBox.center, trackingBox.center, cv::Scalar(0,0,255));//, 5, 8, CV_AA);
+        //cv::circle(DrawingBoard, box.center, 20, cv::Scalar(0,255,0), -1, 8, CV_AA);
+        cv::imshow("Drawing", DrawingBoard);
+    }else {
+        if(!DrawingBoard.empty()) {
+            cv::imwrite("FirstDrawing.jpg", DrawingBoard);
+            DrawingBoard.release();
+        }
+    }
+    }
+    std::swap(prevtrackingBox, trackingBox);
+
+    cv::imshow("Camshift", CurrentFrame);
+}
+
 void CamshiftProcessing::DrawTrackingObject(cv::RotatedRect trackingBox) {
 
     if( trackingWindow.area() <= 1 )
@@ -109,14 +213,7 @@ void CamshiftProcessing::DrawTrackingObject(cv::RotatedRect trackingBox) {
                            trackingWindow.x + r, trackingWindow.y + r) &
                       cv::Rect(0, 0, cols, rows);
     }
-    CvBox2D box ;
-    box.angle = trackingBox.angle;
-    box.center = trackingBox.center;
-    box.size = cv::Size(100,100);
-    cv::RotatedRect tt = cv::RotatedRect(box);
-     cv::ellipse( CurrentFrame, tt, cv::Scalar(0,0,255), 3, CV_AA );
-     cv::imshow("Camshift", CurrentFrame);
-
+    DrawEllipseForTrackingObject(trackingBox);
 }
 
 void CamshiftProcessing::InitializeCamshift() {
@@ -145,6 +242,8 @@ void CamshiftProcessing::GetFinalProbabilityMask() {
 }
 
 void CamshiftProcessing::ApplyFinalProbabilityMask() {
+    if(trackingWindow.area() == 0)
+        return;
      cv::RotatedRect trackingBox = cv::CamShift(finalProbabilityMask, trackingWindow, cv::TermCriteria( cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 10, 1));
      DrawTrackingObject(trackingBox);
 }
@@ -165,15 +264,30 @@ void CamshiftProcessing::ActionOnKeyPress(int key) {
     case 'f':
         flowMode = !flowMode;
         break;
+    case 'd' :
+        drawingMode = !drawingMode;
+        if(drawingMode)
+            SetupDrawingBoard();
+        break;
     default:
         ;
     }
+}
+
+
+void CamshiftProcessing::SetupDrawingBoard() {
+
+    if(CurrentFrame.empty())
+        return;
+    DrawingBoard = cv::Mat::zeros(CurrentFrame.size(), CV_8UC3);
+    CurrentFrame.release();
 }
 
 void CamshiftProcessing::TrackRegionOfInterest() {
 
     cv::Mat sample;
     GetColorProbabilityMask();
+
     while(true) {
 
         videoProcessorClass->capture.read(CurrentFrame);
@@ -189,15 +303,6 @@ void CamshiftProcessing::TrackRegionOfInterest() {
         if(ROIFortracking.area() != 0)
             StartCamshift();
         }
-
-
-        /*if(flowMode) {
-            //cv::circle(sample, CentroidPoint,2,cv::Scalar(0,0,255), -1, 8, CV_AA);
-            cv::Mat externalImage = cv::Mat(CurrentFrame, BoundingBoxForROIForTracking);
-            std::cout << BoundingBoxForROIForTracking.area() << std::endl;
-           // if(BoundingBoxForROIForTracking.area() > 150000)
-                contourClass->FindContourImage(externalImage);
-        }*/
 
         char c = (char)cv::waitKey(10);
         if( c == 27 )

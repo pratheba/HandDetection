@@ -41,14 +41,21 @@ private:
      cv::Rect trackingWindow;
      cv::Mat backProjectImage;
      cv::Mat finalProbabilityMask;
-     bool   IsFirstSelection;
+     cv::Mat DrawingBoard;
+     cv::RotatedRect prevtrackingBox;
 
+     bool   IsFirstSelection;
      bool flowMode;
      bool backprojMode;
+     bool drawingMode;
+     bool IsAverageDistance;
+
+     double averageCamshiftDistance;
 
      void GetColorProbabilityMask();
      void SetOpticalFlow();
      void SelectRegionOfInterest();
+     void GetRegionOfInterest();
      void InitializeCamshift();
      void GetFinalProbabilityMask();
      void StartCamshift();
@@ -60,6 +67,12 @@ private:
      void CalculateHistogramForRegionOfInterest();
      void CalculateBackProjection();
      void ApplyFinalProbabilityMask();
+     void DrawEllipseForTrackingObject(cv::RotatedRect trackingBox);
+     void SetupDrawingBoard() ;
+
+     double GetAverageValueForDistance(cv::RotatedRect trackingBox);
+     bool IsAverageDistanceCalculated(cv::RotatedRect trackingBox);
+     void newLocationOfCenter(cv::RotatedRect& trackingBox);
 
 
 };
