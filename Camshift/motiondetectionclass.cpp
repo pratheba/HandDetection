@@ -58,7 +58,7 @@ void MotionDetectionClass::DrawCentroid(cv::Point centroidPoint) {
 
 void MotionDetectionClass::SeperateHand() {
     cv::normalize(motionMask, motionMask,0, 255, cv::NORM_MINMAX, CV_8UC1);
-    cv::threshold(motionMask, handRegion, 200,255, CV_8UC1);
+    cv::threshold(motionMask, handRegion, 230,255, CV_8UC1);
     SetTheCentroidPoint();
     DrawCentroid(centroidPoint);
 }

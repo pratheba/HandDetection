@@ -15,6 +15,9 @@ CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(
     averageCamshiftDistance = 0;
     IsAverageDistance = false;
 
+    posX = 0;
+    posY = 0;
+
     DrawingBoard = cv::Mat();
 }
 
@@ -161,7 +164,7 @@ void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBo
 
     if(prevtrackingBox.boundingRect().area() == 0)
         prevtrackingBox = trackingBox;
-    else {
+   /* else {
         if(IsAverageDistance) {
             if(std::sqrt(Square(prevtrackingBox.center.x - trackingBox.center.x) + Square(prevtrackingBox.center.y - trackingBox.center.y)) > (averageCamshiftDistance+30)) {
                 trackingBox.angle = prevtrackingBox.angle;// + 1;
@@ -174,7 +177,7 @@ void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBo
         } else {
             IsAverageDistanceCalculated(trackingBox);
         }
-    }
+    }*/
 
 
 
@@ -187,18 +190,69 @@ void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBo
 
     cv::ellipse( CurrentFrame, rotatedBox, cv::Scalar(0,0,255), 3, CV_AA );
 
-    if(IsAverageDistance) {
+   // if(IsAverageDistance) {
     if(drawingMode) {
-        cv::line(DrawingBoard, prevtrackingBox.center, trackingBox.center, cv::Scalar(0,0,255));//, 5, 8, CV_AA);
+        //std::cout << BoundingBoxForROIForTracking.area() << std::endl;
+        //if(BoundingBoxForROIForTracking.area() < 5000)
+          //  cv::circle(DrawingBoard, trackingBox.center, 5, cv::Scalar(0),-1, 8, CV_AA);
+        //else {
+
+
+         cv::line(DrawingBoard, prevtrackingBox.center, trackingBox.center, cv::Scalar(0,0,255));//, 5, 8, CV_AA);
+         cv::circle(DrawingBoard, trackingBox.center, 10, cv::Scalar(0,0,255), -1, 8, CV_AA);
+        //}
         //cv::circle(DrawingBoard, box.center, 20, cv::Scalar(0,255,0), -1, 8, CV_AA);
         cv::imshow("Drawing", DrawingBoard);
     }else {
         if(!DrawingBoard.empty()) {
             cv::imwrite("FirstDrawing.jpg", DrawingBoard);
+            cv::Mat cannyOutput;
+            std::vector<cv::Vec4i> hierarchy;
+            std::vector< std::vector< cv::Point> > hull;
+
+            cv::Mat inputFrame = cv::imread("/home/pratheba/workspace/QTProject/HandDetectionWithCamshift/triangle.jpg");
+
+                 cv::cvtColor(inputFrame, inputFrame, CV_BGR2GRAY);
+                 cv::blur(inputFrame, inputFrame, cv::Size(3,3));
+                 //cv::dilate(inputFrame, inputFrame, cv::Mat(), cv::Point(-1,-1), 5);
+
+                   std::vector<std::vector<cv::Point> > contourPoints;
+                   cv::Mat contourImage;
+                   std::vector<cv::Point> approx;
+
+                 cv::Canny(inputFrame, cannyOutput, 0, 255, 3);
+                 cv::threshold(cannyOutput, cannyOutput, 0, 255, cv::THRESH_BINARY);
+                 cv::imshow("thresh", cannyOutput);
+                 cv::findContours(cannyOutput, contourPoints, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0,0));
+                 contourImage = cv::Mat(cannyOutput.rows,cannyOutput.cols, CV_8UC3,cv::Scalar(0));//cv::Mat::zeros(inputFrame_.size(), CV_8UC3);
+                 hull.resize(contourPoints.size());
+
+                 for(int i=0; i < contourPoints.size(); i++)
+                     cv::convexHull(cv::Mat(contourPoints[i]), hull[i], false);
+
+                 for(int i=0; i < contourPoints.size(); i++) {
+                     cv::approxPolyDP(contourPoints[i],approx,0.01* cv::arcLength(contourPoints[i],true),true);
+                     std::cout << approx.size() << std::endl;
+
+                     cv::drawContours(contourImage, contourPoints, i, cv::Scalar(255,0,0), -1, 8, hierarchy);
+                 }
+
+                 std::cout << "hull" << std::endl;
+                 for(int i =0; i< hull.size(); i++) {
+                     cv::approxPolyDP(hull[i],approx,0.01* cv::arcLength(hull[i],true),true);
+                     std::cout << approx.size() << std::endl;
+
+                     cv::drawContours(contourImage, hull, i, cv::Scalar(0,255,0), 2, 8, hierarchy);
+                 }
+
+
+                 cv::imshow("contour image", contourImage);
+
+
             DrawingBoard.release();
         }
     }
-    }
+  //  }
     std::swap(prevtrackingBox, trackingBox);
 
     cv::imshow("Camshift", CurrentFrame);
@@ -244,6 +298,8 @@ void CamshiftProcessing::GetFinalProbabilityMask() {
 void CamshiftProcessing::ApplyFinalProbabilityMask() {
     if(trackingWindow.area() == 0)
         return;
+    if(drawingMode && !DrawingBoard.empty())
+        cv::circle(DrawingBoard, trackingWindow.tl(), 2, cv::Scalar(255,0,0), -1, 8, CV_AA);
      cv::RotatedRect trackingBox = cv::CamShift(finalProbabilityMask, trackingWindow, cv::TermCriteria( cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 10, 1));
      DrawTrackingObject(trackingBox);
 }

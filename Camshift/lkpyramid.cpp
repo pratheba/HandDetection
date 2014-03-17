@@ -6,7 +6,7 @@
 
 static int ROWSTEPSIZE = 2;
 static int COLSTEPSIZE = 2;
-static int THRESHOLD = 50;
+static int THRESHOLD = 100;
 
 LKPyramid* LKPyramid::lkPyramidClass = NULL;
 

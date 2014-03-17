@@ -74,6 +74,8 @@ private:
      bool IsAverageDistanceCalculated(cv::RotatedRect trackingBox);
      void newLocationOfCenter(cv::RotatedRect& trackingBox);
 
+     int posX, posY;
+
 
 };
 

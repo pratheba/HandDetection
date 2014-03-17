@@ -20,14 +20,19 @@ void ContourClass::FindContourImage(cv::Mat inputFrame_){
    // if(inputFrame.empty())
      //   return;
 
-    cv::Mat inputFrame = inputFrame_.clone();
+
+
+
+    cv::Mat inputFrame = cv::imread("/home/pratheba/workspace/QTProject/HandDetectionWithCamshift/circle.jpg");//inputFrame_.clone();
+    if(inputFrame.empty())
+        inputFrame = cv::imread("/home/pratheba/workspace/QTProject/HandDetectionWithCamshift/circle.jpg");//inputFrame_.clone();
     cv::Mat showingFrame = cv::Mat(400,500,inputFrame.type());
     inputFrame.copyTo(showingFrame);
 
-    cv::imshow("input", showingFrame);
+    //cv::imshow("input", showingFrame);
 
-    /*
 
+/*
     cv::Mat segmentFrame = inputFrame.clone();//inputFrame.clone();
     cv::cvtColor(segmentFrame, segmentFrame, CV_BGR2GRAY);
     cv::threshold(segmentFrame, segmentFrame, 100, 255, CV_THRESH_BINARY);
@@ -87,7 +92,8 @@ void ContourClass::FindContourImage(cv::Mat inputFrame_){
                   cv::imshow("dst", dst);*/
 
 
-    /*
+    //while(true) {
+         //videoProcessorClass->capture.read(inputFrame);
     cv::Mat cannyOutput;
     std::vector<cv::Vec4i> hierarchy;
     std::vector< std::vector< cv::Point> > hull;
@@ -97,6 +103,8 @@ void ContourClass::FindContourImage(cv::Mat inputFrame_){
 
          cv::cvtColor(inputFrame, inputFrame, CV_BGR2GRAY);
          cv::blur(inputFrame, inputFrame, cv::Size(3,3));
+         cv::Mat contourImage;
+         std::vector<std::vector<cv::Point> > contourPoints;
 
          cv::Canny(inputFrame, cannyOutput, 100, 200, 3);
          //cv::threshold(cannyOutput, cannyOutput, 150, 200, cv::THRESH_BINARY);
@@ -114,16 +122,23 @@ void ContourClass::FindContourImage(cv::Mat inputFrame_){
 
          ShowContourImage();
 
-    //     int c = cvWaitKey(10);
+     //    int c = cvWaitKey(10);
       //   if(c==27)  //ESC key
         //     break;
   //  }
-  */
+
+
+
+                          // if(c==27)  //ESC key
+                          //     break;
 
 }
 
 void ContourClass::ShowContourImage(){
     cv::imshow("contour image", contourImage);
 }
+
+
+
 
 
