@@ -195,8 +195,8 @@ void LKPyramid::DrawTheArrow(cv::Point2f PrevPt, cv::Point2f currPt, double angl
 }
 
 void LKPyramid::DisplayFlow() {
-    cv::imshow(windowNameCurr, currentFrame);
-    cv::imshow(windowNamePrev, prevFrame);
+    //cv::imshow(windowNameCurr, currentFrame);
+    //cv::imshow(windowNamePrev, prevFrame);
     cv::imshow(windowNameOpticalFlow, OpticalFlowImage);
 }
 

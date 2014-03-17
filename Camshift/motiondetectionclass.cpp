@@ -12,6 +12,7 @@ MotionDetectionClass::MotionDetectionClass()
 }
 
 void MotionDetectionClass::DisplayFlow() {
+    SetImageWindowName();
     lkpyramidClass->DrawAndDisplay();
 }
 
@@ -38,6 +39,7 @@ void MotionDetectionClass::FillTheMotionMask() {
         }
         row++;
     }
+    // cv::imshow("motionmask", motionMask);
 }
 
 cv::Point MotionDetectionClass::GetTheCentroid() {

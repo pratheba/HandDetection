@@ -6,7 +6,7 @@
 #include "maskforcamshift.h"
 #include "motiondetectionclass.h"
 #include "regionofinterest.h"
-#include "FingerTipDetection/imagesegmentation.h"
+#include "FingerTipDetection/contourclass.h"
 
 class CamshiftProcessing
 {
@@ -19,6 +19,7 @@ private:
      VideoProcessorClass* videoProcessorClass;
      MotionDetectionClass* motionMaskClass;
      RegionOfInterest* ROIClass;
+     ContourClass* contourClass;
      MinMaxHSVValue HSVmaskValue;
 
      cv::Mat motionMask;
@@ -27,9 +28,12 @@ private:
      cv::Mat HueFrame;
      cv::Mat maskToCurrentFrame;
      cv::Rect ROIFortracking;
+     cv::Rect BoundingBoxForROIForTracking;
      cv::Mat ROI;
      cv::Mat ROIMask;
      cv::Mat HSVMask;
+     cv::Point CentroidPoint;
+     cv::Point avgCenterPoint;
 
      cv::Mat histogramImage;
      int histogramsize;
@@ -38,11 +42,6 @@ private:
      cv::Mat backProjectImage;
      cv::Mat finalProbabilityMask;
      bool   IsFirstSelection;
-
-     double minDisplacement;
-     double maxDisplacement;
-     cv::Point minDisplacementLocation;
-     cv::Point maxDisplacementLocation;
 
      bool flowMode;
      bool backprojMode;

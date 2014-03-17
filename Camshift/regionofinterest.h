@@ -6,6 +6,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <FingerTipDetection/contourclass.h>
+
 class RegionOfInterest
 {
 public:
@@ -13,6 +15,7 @@ public:
     void FindRegionOfInterestToTrack(cv::Mat inputFrame_);
     void DrawBoundingBoxforRegionOfInterest(cv::Mat inputFrame);
     cv::Rect GetBoundingBoxOfRegionofInterest();
+    void Centroid(cv::Point cen);
 
 private:
     cv::Mat inputFrame;
@@ -27,6 +30,11 @@ private:
     std::vector<cv::Point> approxContour;
     std::vector<cv::Point> approxConvexHull;
 
+    std::vector<cv::Point> ContourCenter;
+    std::vector<cv::Point> centroidCenter;
+
+    cv::Point cen;
+
     void GetCannyImage();
     void FindContoursInImage();
     void FindConvexHull();
@@ -37,6 +45,8 @@ private:
     void FindBoundingBox();
     void GetContourImage();
     void SegmentByConvexHull();
+
+    ContourClass* contourClass;
 
 };
 

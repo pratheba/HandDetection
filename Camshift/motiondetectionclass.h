@@ -10,6 +10,7 @@ public:
     MotionDetectionClass();
     cv::Mat GetTheMotionMask(const cv::Mat inputFrame);
     cv::Point GetTheCentroid();
+    void DisplayFlow();
 
 private:
 
@@ -21,7 +22,7 @@ private:
     cv::Mat currentFrame;
     cv::Point centroidPoint;
 
-    void DisplayFlow();
+
     void SetTheMotionMask();
     void FillTheMotionMask();
     void SeperateHand();

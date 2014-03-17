@@ -39,7 +39,7 @@ int main(int argc, const char *argv[]) {
     /* Get the VideoProcessing */
     videoProcessor->SetVideoCaptureInstance();
     //videoProcessor->ChooseProcessorClass(atoi(argv[1]));
-    videoProcessor->SetframeToStopProcessing(10);
+    videoProcessor->SetframeToStopProcessing(30);
     videoProcessor->displayInput("Input Frame");
     videoProcessor->displayOutput("Output Frame");
 

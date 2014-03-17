@@ -145,7 +145,8 @@ void MaskForCamshift::ComputeHistogram() {
     const float* valueRange = { valuerange};
     // Compute the histograms:
 
-
+    if(&HSVChannels[0] == 0)
+        return;
     calcHist( &HSVChannels[0], 1, 0, cv::Mat(), hueHistogram, 1, &hBins, &hueRange, uniform, accumulate );
     calcHist( &HSVChannels[1], 1, 0, cv::Mat(), saturationHistogram, 1, &sBins, &saturationRange, uniform, accumulate );
     calcHist( &HSVChannels[2], 1, 0, cv::Mat(), valueHistogram, 1, &vBins, &valueRange, uniform, accumulate );
