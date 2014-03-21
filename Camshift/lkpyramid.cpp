@@ -107,6 +107,7 @@ void LKPyramid::CalculateOpticalFlow(const cv::Mat& inputFrame) {
                                  statusOfFlowForFeature, error,
                                  windowSizeForTracking, 3, termcriteria);
         SetTheFlowVector();
+        //DrawAndDisplay();
     }
     else if(prevFrame.empty()) {
         currentFrame = inputFrame.clone();

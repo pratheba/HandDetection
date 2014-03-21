@@ -49,6 +49,7 @@ private:
      bool backprojMode;
      bool drawingMode;
      bool IsAverageDistance;
+     bool drawOpticalFlowMode;
 
      double averageCamshiftDistance;
 

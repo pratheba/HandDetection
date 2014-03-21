@@ -39,7 +39,7 @@ void MotionDetectionClass::FillTheMotionMask() {
         }
         row++;
     }
-    // cv::imshow("motionmask", motionMask);
+     cv::imshow("motionmask", motionMask);
 }
 
 cv::Point MotionDetectionClass::GetTheCentroid() {

@@ -14,6 +14,7 @@ CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(
     histogramsize = 180;
     averageCamshiftDistance = 0;
     IsAverageDistance = false;
+    drawOpticalFlowMode = false;
 
     posX = 0;
     posY = 0;
@@ -24,6 +25,8 @@ CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(
 void CamshiftProcessing::GetColorProbabilityMask() {
     if(videoProcessorClass->facedetectionClass != NULL) {
         HSVmaskValue = videoProcessorClass->facedetectionClass->GetHSVmaskForFace();
+
+
     }
     else {float* phranges;
 
@@ -38,8 +41,8 @@ void CamshiftProcessing::SetOpticalFlow() {
     motionMask = cv::Scalar(1.0);
     motionMask = motionMaskClass->GetTheMotionMask(CurrentFrame.clone());
     CentroidPoint = motionMaskClass->GetTheCentroid();
-    //if(!motionMask.empty())
-      //  motionMaskClass->DisplayFlow();
+    if(!motionMask.empty() && drawOpticalFlowMode)
+        motionMaskClass->DisplayFlow();
 }
 
 void CamshiftProcessing::CalculateBackProjection() {
@@ -153,7 +156,6 @@ double CamshiftProcessing::GetAverageValueForDistance(cv::RotatedRect trackingBo
         return 0;
     }
     double distance = std::sqrt(Square(prevtrackingBox.center.x - trackingBox.center.x) + Square(prevtrackingBox.center.y - trackingBox.center.y));
-    std::cout << ".." << distance << std::endl;
      averageCamshiftDistance += distance;
     iter++;
      return 0;
@@ -184,7 +186,10 @@ void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBo
     CvBox2D box ;
     box.angle = trackingBox.angle;
     box.center = trackingBox.center;
-    box.size = cv::Size(100,150);
+    //if(BoundingBoxForROIForTracking.area() < 5000)
+      //  box.size = cv::Size(30,30);
+    //else
+        box.size = cv::Size(100,100);
 
     cv::RotatedRect rotatedBox = cv::RotatedRect(box);
 
@@ -202,11 +207,14 @@ void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBo
          cv::circle(DrawingBoard, trackingBox.center, 10, cv::Scalar(0,0,255), -1, 8, CV_AA);
         //}
         //cv::circle(DrawingBoard, box.center, 20, cv::Scalar(0,255,0), -1, 8, CV_AA);
-        cv::imshow("Drawing", DrawingBoard);
+        // DrawingBoard.copyTo(CurrentFrame);
+         cv::addWeighted(CurrentFrame, 1, DrawingBoard, 0.5, 0.0, CurrentFrame);
+        cv::imshow("DrawinginFrame", CurrentFrame);
+         cv::imshow("DrawinginBoard", DrawingBoard);
     }else {
         if(!DrawingBoard.empty()) {
             cv::imwrite("FirstDrawing.jpg", DrawingBoard);
-            cv::Mat cannyOutput;
+            /*cv::Mat cannyOutput;
             std::vector<cv::Vec4i> hierarchy;
             std::vector< std::vector< cv::Point> > hull;
 
@@ -246,7 +254,7 @@ void CamshiftProcessing::DrawEllipseForTrackingObject(cv::RotatedRect trackingBo
                  }
 
 
-                 cv::imshow("contour image", contourImage);
+                 cv::imshow("contour image", contourImage);*/
 
 
             DrawingBoard.release();
@@ -324,6 +332,9 @@ void CamshiftProcessing::ActionOnKeyPress(int key) {
         drawingMode = !drawingMode;
         if(drawingMode)
             SetupDrawingBoard();
+        break;
+    case 'o' :
+        drawOpticalFlowMode = !drawOpticalFlowMode;
         break;
     default:
         ;

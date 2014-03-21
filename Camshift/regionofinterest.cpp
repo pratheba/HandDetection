@@ -80,6 +80,7 @@ void RegionOfInterest::DrawContourAndConvexHull() {
     }
     }
 
+
    /* double maxArea = 0;
     int whichContour = -1;
 
