@@ -107,11 +107,11 @@ void CamshiftProcessing::SetHSVColorProbabilityMask() {
     // Include this if the object to be tracked is of Face
     // The HSVmaskValue is obtained from training face Detection Classifier
 
-    //cv::inRange(HSVFrame, cv::Scalar(HSVmaskValue.minhue, HSVmaskValue.minSat, HSVmaskValue.minValue),
-      //      cv::Scalar(HSVmaskValue.maxhue, HSVmaskValue.maxSat, HSVmaskValue.maxvalue), HSVMask);
+    cv::inRange(HSVFrame, cv::Scalar(HSVmaskValue.minhue, HSVmaskValue.minSat, HSVmaskValue.minValue),
+            cv::Scalar(HSVmaskValue.maxhue, HSVmaskValue.maxSat, HSVmaskValue.maxvalue), HSVMask);
 
-    cv::inRange(HSVFrame, cv::Scalar(6.0, 60.0, 32.0),
-            cv::Scalar(38.0, 255.0, 255.0), HSVMask);
+    //cv::inRange(HSVFrame, cv::Scalar(6.0, 60.0, 32.0),
+      //      cv::Scalar(38.0, 255.0, 255.0), HSVMask);
 
 }
 

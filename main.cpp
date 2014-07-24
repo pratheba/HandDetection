@@ -31,7 +31,7 @@ int main(int argc, const char *argv[]) {
         return -1;
     }*/
 
-    //std::cout<< argv[0] << std::endl;
+    std::cout<< atoi(argv[1]) << std::endl;
     VideoProcessorClass* videoProcessor  =  VideoProcessorClass::getInstance(atoi(argv[1]));// new VideoProcessorClass(atoi(argv[1]));
     CamshiftProcessing* camshift = new CamshiftProcessing();
 

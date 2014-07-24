@@ -73,9 +73,9 @@ void MaskForCamshift::CalculateMinMaxValueForSkinColor() {
             maxHue = i;//hueAccumulator[i];
         }*/
 
-        if((minHue < 0) && (hueAccumulator[i] >= 20))
+        if((minHue < 0) && (hueAccumulator[i] >= 5))
             minHue = i;
-        if((hueAccumulator[i] >= 20))
+        if((hueAccumulator[i] >= 5))
             maxHue = i;
     }
 
@@ -99,15 +99,15 @@ void MaskForCamshift::CalculateMinMaxValueForSkinColor() {
             maxValue = i;
         }*/
 
-        if((minS < 0 ) && (saturationAccumulator[i] >= 20))
+        if((minS < 0 ) && (saturationAccumulator[i] >= 5))
             minS = i;
-        if((saturationAccumulator[i] >= 20))
+        if((saturationAccumulator[i] >= 5))
             maxS = i;
 
 
-        if((minV < 0) && (valueAccumulator[i] >= 20))
+        if((minV < 0) && (valueAccumulator[i] >= 5))
             minV = i;
-        if((valueAccumulator[i] >= 20))
+        if((valueAccumulator[i] >= 5))
             maxV = i;
 
     }
@@ -115,6 +115,9 @@ void MaskForCamshift::CalculateMinMaxValueForSkinColor() {
 
 
 void MaskForCamshift::GetAverageforeachBin() {
+    if(totalNumberOfimages <= 0)
+        return;
+
     for(int h=0; h < hBins; h++) {
         hueAccumulator[h] /= totalNumberOfimages;
     }
