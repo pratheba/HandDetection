@@ -51,12 +51,12 @@ void HaarCascaseClassifierClass::reset() {
     //processedFrame.release();
 }
 
-void HaarCascaseClassifierClass::ProcessFrame(cv::Mat& inputFrame, cv::Mat& outputframe) {
-    processedFrame = inputFrame.clone();
+void HaarCascaseClassifierClass::ProcessFrame(cv::Mat& inputoutputframe) {
+    processedFrame = inputoutputframe.clone();
     //loadCascadeClassifier();
-    cv::cvtColor(inputFrame, processedFrame, CV_BGR2GRAY);
+    cv::cvtColor(inputoutputframe, processedFrame, CV_BGR2GRAY);
     haarCascadeClassifier.detectMultiScale(processedFrame, itemsDetected);
-    loadDetectedPointandWindowSize(outputframe);
+    loadDetectedPointandWindowSize(inputoutputframe);
     processedFrame.release();
 }
 

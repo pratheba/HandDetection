@@ -18,7 +18,7 @@
 
 
 #include <iostream>
-#include "Camshift/videoprocessorclass.h"
+#include "VideoProcessing/videoprocessorclass.h"
 #include "Camshift/camshiftprocessing.h"
 #include "FingerTipDetection/contourclass.h"
 #include "FingerTipDetection/imagesegmentation.h"
@@ -43,7 +43,19 @@ int main(int argc, const char *argv[]) {
     videoProcessor->displayInput("Input Frame");
     videoProcessor->displayOutput("Output Frame");
 
+
+    // To get the time taken in terms of second
+
+
+
+    double initialTickCount = (double)cv::getTickCount();
     videoProcessor->ProcessVideoFrame();
+
+    double finalTickCount = (double)cv::getTickCount();
+
+    double timeextended = (finalTickCount - initialTickCount)/cv::getTickFrequency();
+
+    std::cout << timeextended << std::endl;
 
     /* Get the color Probability mask */
     camshift->TrackRegionOfInterest();

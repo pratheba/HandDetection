@@ -39,10 +39,10 @@ void FaceDetectionClass::SaveRegionOfInterestAsHSV(cv::Mat& outputFrame, cv::Rec
     regionOfInterestinHSV.push_back(RegionOfInterestinHSV);
 }
 
-void FaceDetectionClass::ProcessFrameToDetectface(cv::Mat& inputFrame, cv::Mat& outputFrame) {
-    haarClassifier->ProcessFrame(inputFrame, outputFrame);
+void FaceDetectionClass::ProcessFrameToDetectface(cv::Mat& inputoutputframe) {
+    haarClassifier->ProcessFrame(inputoutputframe);
     cv::Rect_<int> ROIrectangle = (haarClassifier->GetPositionAndScaleOfDetectedItem());
-    SaveRegionOfInterestAsHSV(outputFrame, ROIrectangle);
+    SaveRegionOfInterestAsHSV(inputoutputframe, ROIrectangle);
     positionAndScale.push_back(ROIrectangle);
 }
 

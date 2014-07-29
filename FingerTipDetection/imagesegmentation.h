@@ -5,7 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
-#include "Camshift/videoprocessorclass.h"
+#include "VideoProcessing/videoprocessorclass.h"
 
 class ImageSegmentation
 {

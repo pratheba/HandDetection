@@ -25,10 +25,8 @@ CamshiftProcessing::CamshiftProcessing():histogramranges({0,180}), backprojMode(
 void CamshiftProcessing::GetColorProbabilityMask() {
     if(videoProcessorClass->facedetectionClass != NULL) {
         HSVmaskValue = videoProcessorClass->facedetectionClass->GetHSVmaskForFace();
-
-
     }
-    else {float* phranges;
+    else {//float* phranges;
 
         std::cout << "No processing has been done to get the HSV value"  << std::endl;
         return;
@@ -352,12 +350,15 @@ void CamshiftProcessing::SetupDrawingBoard() {
 
 void CamshiftProcessing::TrackRegionOfInterest() {
 
+    int count = 0;
     cv::Mat sample;
     GetColorProbabilityMask();
 
     while(true) {
 
         videoProcessorClass->capture.read(CurrentFrame);
+        count++;
+
         if(CurrentFrame.empty())
             continue;
 

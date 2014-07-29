@@ -4,11 +4,16 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
+include(VideoProcessing.pri)
+include(FaceDetection.pri)
+include(LucasPyramid-opticalFlow.pri)
+include(CamShift.pri)
 
 
 INCLUDEPATH += /usr/include/ \
                /usr/local/include/ \
                /usr/include/qt5/ \
+               /usr/share/doc/ \
 
 LIBS += -L/usr/lib \
     -lopencv_core \
@@ -26,43 +31,32 @@ LIBS += -L/usr/lib \
     -lopencv_photo \
     -lQtCore \
     -lQtGui \
-    -lQtWebKit
+    -lQtWebKit \
+    -ltbb \
 
 LIBS += -L/usr/lib/x86_64-linux-gnu \
     -lglut \
     -lGL    \
     -lGLU
 
+
+
 SOURCES += main.cpp \
     FingerTipDetection/contourclass.cpp \
     FingerTipDetection/imagesegmentation.cpp \
-    Camshift/videoprocessorclass.cpp \
-    Camshift/motiondetectionclass.cpp \
-    Camshift/maskforcamshift.cpp \
-    Camshift/lkpyramid.cpp \
-    Camshift/handdetectionclass.cpp \
-    Camshift/haarcascaseclassifierclass.cpp \
-    Camshift/facedetectionclass.cpp \
-    Camshift/camshiftprocessing.cpp \
-    Camshift/regionofinterest.cpp \
-
 
 
 HEADERS += \
-    Camshift/haarcascaseclassifierclass.h \
-    Camshift/videoprocessorclass.h \
-    Camshift/facedetectionclass.h \
-    Camshift/motiondetectionclass.h \
-    Camshift/camshiftprocessing.h \
-    Camshift/maskforcamshift.h \
-    Camshift/lkpyramid.h \
-    Camshift/handdetectionclass.h \
-    Camshift/regionofinterest.h \
     FingerTipDetection/contourclass.h \
-    FingerTipDetection/imagesegmentation.h
+    FingerTipDetection/imagesegmentation.h \
+
 
 OTHER_FILES += \
-    images/lena.bmp
+    images/lena.bmp \
+    VideoProcessing.pri \
+    FaceDetection.pri \
+    LucasPyramid-opticalFlow.pri \
+    CamShift.pri
 
 RESOURCES += \
     Resources.qrc \

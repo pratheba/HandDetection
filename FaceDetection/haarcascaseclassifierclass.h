@@ -17,7 +17,7 @@ public:
     HaarCascaseClassifierClass(std::string cascadeXML_);
     ~HaarCascaseClassifierClass();
 
-    void ProcessFrame(cv::Mat& inputFrame, cv::Mat& outputFrame);
+    void ProcessFrame(cv::Mat& inputoutputframe);
     cv::Rect_<int> GetPositionAndScaleOfDetectedItem();
     void reset();
 

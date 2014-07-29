@@ -1,5 +1,7 @@
 #include "lkpyramid.h"
 
+#include "lkloopparallellclass.h"
+
 #define WINDOW_SIZE  10
 #define MAXFEATURECOUNT  400
 
@@ -160,6 +162,13 @@ void LKPyramid::SetTheFlowVector() {
 
 void LKPyramid::DrawTheFlow() {
 
+
+    double initialTickCount = (double)cv::getTickCount();
+
+//    tbb::parallel_for(tbb::blocked_range<int>(0,PrevFramefeatures.size()),LKLoopParallellClass(OpticalFlowImage, error, CurrentFramefeatures, PrevFramefeatures, statusOfFlowForFeature),
+//                      tbb::auto_partitioner());
+
+
     for (int i = 0; i < PrevFramefeatures.size(); i++) {
         if ((statusOfFlowForFeature[i] == 0) || (int)error.data[i] > 550)
             continue;
@@ -173,7 +182,14 @@ void LKPyramid::DrawTheFlow() {
           currPt.y = (int) (PrevPt.y - 3 * hypotenuse * sin(angle));
           DrawTheArrow(PrevPt, currPt, angle);
         }
+    double finalTickCount = (double)cv::getTickCount();
+
+    double timeextended = (finalTickCount - initialTickCount)/cv::getTickFrequency();
+
+    std::cout << timeextended << std::endl;
+
 }
+
 double LKPyramid::GetAngleOfFlow(cv::Point2f PrevPt, cv::Point2f currPt) {
     double angle;
     angle = atan2( (double) PrevPt.y - currPt.y, (double) PrevPt.x - currPt.x );

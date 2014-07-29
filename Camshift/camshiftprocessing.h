@@ -2,9 +2,9 @@
 #define CAMSHIFTPROCESSING_H
 
 
-#include "videoprocessorclass.h"
-#include "maskforcamshift.h"
-#include "motiondetectionclass.h"
+#include "VideoProcessing/videoprocessorclass.h"
+#include "FaceDetection/maskforcamshift.h"
+#include "LKPyramid/motiondetectionclass.h"
 #include "regionofinterest.h"
 #include "FingerTipDetection/contourclass.h"
 

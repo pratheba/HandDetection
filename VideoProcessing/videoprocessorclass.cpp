@@ -125,6 +125,7 @@ void VideoProcessorClass::ChooseProcessorClass(int frameProcessor) {
 
 }
 
+
 void VideoProcessorClass::ProcessVideoFrame() {
     if(!IsVideoDeviceEnabled()) {
         std::cout << "Video frame could not be read\n . Try re-initializing\n" << std::endl;
@@ -134,15 +135,14 @@ void VideoProcessorClass::ProcessVideoFrame() {
 
 
     while(!isToStopProcessing()) {
+
         capture.read(currentFrame);
         outputFrame = currentFrame.clone();
-        facedetectionClass->ProcessFrameToDetectface(currentFrame, outputFrame);
-        //process(currentFrame, outputFrame);
-
+        facedetectionClass->ProcessFrameToDetectface(outputFrame);
         currentframenumber++;
+
         DisplayFrames();
-        //DisplayFrames(currentFrame, outputFrame);
-        //if(frameToStopProcessing >= 0 && getFrameNumber() == frameToStopProcessing) {
+
         if(currentframenumber == frameToStopProcessing) {
             facedetectionClass->isFramesReached = true;
             stopProcessing();
@@ -154,6 +154,7 @@ void VideoProcessorClass::ProcessVideoFrame() {
             break;
 
         currentFrame.release();
-        outputFrame.release();
+         outputFrame.release();
     }
+
 }

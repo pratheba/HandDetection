@@ -7,9 +7,8 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
 
-#include "facedetectionclass.h"
-//#include "camshiftprocessing.h"
 
+#include "videoprocessingloopclass.h"
 
 
 class VideoProcessorClass
@@ -32,6 +31,7 @@ public:
     cv::Mat GetCurrentFrame() ;
     void Initialize();
 
+
     /////////////
     FaceDetectionClass* facedetectionClass;
 
@@ -41,6 +41,7 @@ public:
 private:
     //friend class CamshiftProcessing;
     static VideoProcessorClass* videoProcessorClass;
+
     VideoProcessorClass();
     VideoProcessorClass(int videoDeviceID_);
     ~VideoProcessorClass();

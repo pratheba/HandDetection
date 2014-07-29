@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 
+
 class LKPyramid
 {
 public:
