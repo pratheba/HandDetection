@@ -8,6 +8,7 @@ include(VideoProcessing.pri)
 include(FaceDetection.pri)
 include(LucasPyramid-opticalFlow.pri)
 include(CamShift.pri)
+include(Classifier.pri)
 
 
 INCLUDEPATH += /usr/include/ \
@@ -56,7 +57,8 @@ OTHER_FILES += \
     VideoProcessing.pri \
     FaceDetection.pri \
     LucasPyramid-opticalFlow.pri \
-    CamShift.pri
+    CamShift.pri \
+    Classifier.pri
 
 RESOURCES += \
     Resources.qrc \
