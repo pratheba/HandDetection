@@ -11,8 +11,8 @@
 
 enum typeOfImage {
     IMG_NONE     = 3,
-    IMG_TRIANGLE = 1,
-    IMG_CIRCLE   = 2
+    IMG_TRIANGLE = 2,
+    IMG_CIRCLE   = 1
 };
 
 class HOGFeatureSelector
@@ -23,10 +23,12 @@ public:
 
     void SetValuesForDescriptor();
     void ComputeHOGFeatures(std::string trainingDataSet, int numberOfImages, typeOfImage typeOfImage_);
+    void ComputeHOGFeaturesForTestImage(std::string testImageFile);
     cv::Mat GetHoGDescriptor(typeOfImage typeOfImage_);
 
     cv::Mat hogDescriptorMat;
     cv::Mat TrainingClass;
+    cv::Mat TestClassMat;
 
 private:
 

@@ -8,6 +8,10 @@ SVMClassifier::SVMClassifier()
 
 }
 
+SVMClassifier::~SVMClassifier() {
+
+}
+
 
 void SVMClassifier::TrainData(cv::Mat trainingDataMat, cv::Mat labelsMat) {
     SVM.train(trainingDataMat, labelsMat, cv::Mat(), cv::Mat(), params);
@@ -16,5 +20,9 @@ void SVMClassifier::TrainData(cv::Mat trainingDataMat, cv::Mat labelsMat) {
     std::cout<<"Number of support vectors in the SVM: " << SVM.get_support_vector_count() <<std::endl;
 }
 
-void ClassifyImage(cv::Mat inputImage) {
+void SVMClassifier::ClassifyImage(cv::Mat inputImage) {
+
+    float result = SVM.predict(inputImage);
+    std::cout << result << std::endl;
+
 }

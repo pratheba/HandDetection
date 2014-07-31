@@ -9,9 +9,10 @@ include(FaceDetection.pri)
 include(LucasPyramid-opticalFlow.pri)
 include(CamShift.pri)
 include(Classifier.pri)
-
+include(MarkerlessAr.pri)
 
 INCLUDEPATH += /usr/include/ \
+               /usr/include/GL \
                /usr/local/include/ \
                /usr/include/qt5/ \
                /usr/share/doc/ \
@@ -34,11 +35,19 @@ LIBS += -L/usr/lib \
     -lQtGui \
     -lQtWebKit \
     -ltbb \
+    -lQtOpenGL \
+    -lQt5OpenGL \
+
+LIBS += `pkg-config opencv --libs`
+
 
 LIBS += -L/usr/lib/x86_64-linux-gnu \
     -lglut \
     -lGL    \
-    -lGLU
+    -lGLU \
+
+
+QT += opengl
 
 
 
@@ -58,7 +67,8 @@ OTHER_FILES += \
     FaceDetection.pri \
     LucasPyramid-opticalFlow.pri \
     CamShift.pri \
-    Classifier.pri
+    Classifier.pri \
+    MarkerlessAr.pri
 
 RESOURCES += \
     Resources.qrc \
