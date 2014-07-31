@@ -62,10 +62,7 @@ int main(int argc, const char *argv[]) {
     svmClassifier->TrainData(hogfeatureSelector->hogDescriptorMat, hogfeatureSelector->TrainingClass);
 
 
-    std::string testImagefileName = "/home/pratheba/workspace/QTProject/HandDetectionWithCamshift/Images/Test/";
 
-    hogfeatureSelector->ComputeHOGFeaturesForTestImage(testImagefileName);
-    svmClassifier->ClassifyImage(hogfeatureSelector->TestClassMat);
 
     /* Compute features for SVM classifier using HOG feature selector */
 
@@ -92,22 +89,17 @@ int main(int argc, const char *argv[]) {
 
     /* Get the color Probability mask */
     camshift->TrackRegionOfInterest();
-//    //camshift->GetColorProbabilityMask();
-//    //camshift->GetOpticalFlow();
+
+    std::string testImagefileName = "/home/pratheba/workspace/QTProject/HandDetectionWithCamshift/Images/Test/";
+
+    hogfeatureSelector->ComputeHOGFeaturesForTestImage(testImagefileName);
+    svmClassifier->ClassifyImage(hogfeatureSelector->TestClassMat);
 
 
-////    //ContourClass* contourClass = new ContourClass();
-////    //contourClass->FindContourImage(cv::Mat());
-
-
-////    //ImageSegmentation* imgSegment = new ImageSegmentation();
-////    //imgSegment->SegmentByWaterShed(cv::Mat());
-
-
-    //videoProcessor->release();
-    //delete camshift;
-//    delete hogfeatureSelector;
-//    delete svmClassifier;
+    videoProcessor->release();
+    delete camshift;
+    delete hogfeatureSelector;
+    delete svmClassifier;
    // delete houghClass;
 
     //delete markerlessAR;
